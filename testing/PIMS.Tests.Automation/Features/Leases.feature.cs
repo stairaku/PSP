@@ -165,14 +165,14 @@ this.ScenarioInitialize(scenarioInfo);
             await this.ScenarioCleanupAsync();
         }
         
-        [Xunit.SkippableFactAttribute(DisplayName="03. Leases Approval/Consultations")]
+        [Xunit.SkippableFactAttribute(DisplayName="03._Leases_Approval_Consultations")]
         [Xunit.TraitAttribute("FeatureTitle", "Leases and Licenses")]
-        [Xunit.TraitAttribute("Description", "03. Leases Approval/Consultations")]
-        public async System.Threading.Tasks.Task _03_LeasesApprovalConsultations()
+        [Xunit.TraitAttribute("Description", "03._Leases_Approval_Consultations")]
+        public async System.Threading.Tasks.Task _03__Leases_Approval_Consultations()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("03. Leases Approval/Consultations", null, tagsOfScenario, argumentsOfScenario, featureTags);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("03._Leases_Approval_Consultations", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 19
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
