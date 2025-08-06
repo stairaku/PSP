@@ -6,7 +6,7 @@ import { usePimsPropertyRepository } from '@/hooks/repositories/usePimsPropertyR
 import useIsMounted from '@/hooks/util/useIsMounted';
 import { ApiGen_CodeTypes_DocumentRelationType } from '@/models/api/generated/ApiGen_CodeTypes_DocumentRelationType';
 import { ApiGen_Concepts_DocumentRelationship } from '@/models/api/generated/ApiGen_Concepts_DocumentRelationship';
-import { ApiGen_Concepts_PropertyActivity } from '@/models/api/generated/ApiGen_Concepts_PropertyActivity';
+import { ApiGen_Concepts_ManagementActivity } from '@/models/api/generated/ApiGen_Concepts_ManagementActivity';
 import { exists, getApiPropertyName, relationshipTypeToPathName } from '@/utils';
 
 import { DocumentRow } from '../ComposedDocument';
@@ -24,7 +24,7 @@ const DocumentActivityListContainer: React.FunctionComponent<
 
   const [documentResults, setDocumentResults] = useState<DocumentRow[]>([]);
 
-  const [activity, setActivity] = useState<ApiGen_Concepts_PropertyActivity>(null);
+  const [activity, setActivity] = useState<ApiGen_Concepts_ManagementActivity>(null);
 
   const {
     getPropertyManagementActivity: { execute: getManagementActivity, loading: getActivityLoading },
@@ -52,7 +52,7 @@ const DocumentActivityListContainer: React.FunctionComponent<
   }, [getManagementActivity, props.parentId, isMounted, getProperties]);
 
   const retrieveActivitiesDocuments = useCallback(
-    async (activity: ApiGen_Concepts_PropertyActivity) => {
+    async (activity: ApiGen_Concepts_ManagementActivity) => {
       if (!exists(activity)) {
         return;
       }
@@ -109,6 +109,8 @@ const DocumentActivityListContainer: React.FunctionComponent<
     return [...new Set(documentResults?.map(x => x.relationshipType) ?? [])];
   }, [documentResults]);
 
+  const editDocumentsEnabled = !props.statusSolver || props.statusSolver?.canEditDocuments();
+
   return (
     <DocumentListView
       parentId={props.parentId}
@@ -124,6 +126,8 @@ const DocumentActivityListContainer: React.FunctionComponent<
       disableAdd={props.disableAdd}
       title={props.title}
       showParentInformation={true}
+      data-testId="document-activity-list"
+      canEditDocuments={editDocumentsEnabled}
     />
   );
 };

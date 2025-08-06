@@ -5,7 +5,7 @@ import { matchPath, useHistory, useLocation, useRouteMatch } from 'react-router-
 
 import LoadingBackdrop from '@/components/common/LoadingBackdrop';
 import { useMapStateMachine } from '@/components/common/mapFSM/MapStateMachineContext';
-import { useManagementProvider } from '@/hooks/repositories/useManagementProvider';
+import { useManagementFileRepository } from '@/hooks/repositories/useManagementFileRepository';
 import { usePropertyAssociations } from '@/hooks/repositories/usePropertyAssociations';
 import { useQuery } from '@/hooks/use-query';
 import useApiUserOverride from '@/hooks/useApiUserOverride';
@@ -52,7 +52,7 @@ export const ManagementContainer: React.FunctionComponent<IManagementContainerPr
     },
     updateManagementProperties,
     getLastUpdatedBy: { execute: getLastUpdatedBy, loading: loadingGetLastUpdatedBy },
-  } = useManagementProvider();
+  } = useManagementFileRepository();
   const { execute: getPropertyAssociations } = usePropertyAssociations();
 
   const { setModalContent, setDisplayModal } = useModalContext();
@@ -156,22 +156,16 @@ export const ManagementContainer: React.FunctionComponent<IManagementContainerPr
       return;
     }
 
-    const fileProperties = managementFile.fileProperties ?? [];
-    const menuIndex = fileProperties.findIndex(fp => fp.id === filePropertyId);
-    if (menuIndex < 0) {
-      return;
-    }
-
     if (isEditing) {
       if (formikRef?.current?.dirty) {
         handleCancelClick(() =>
-          pathGenerator.showFilePropertyIndex('management', managementFile.id, menuIndex + 1),
+          pathGenerator.showFilePropertyId('management', managementFile.id, filePropertyId),
         );
         return;
       }
     }
     // The index needs to be offset to match the menu index
-    pathGenerator.showFilePropertyIndex('management', managementFile.id, menuIndex + 1);
+    pathGenerator.showFilePropertyId('management', managementFile.id, filePropertyId);
   };
 
   const onEditProperties = () => {

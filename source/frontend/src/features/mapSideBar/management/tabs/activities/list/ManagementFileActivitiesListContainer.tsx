@@ -8,21 +8,24 @@ import usePathGenerator from '@/features/mapSideBar/shared/sidebarPathGenerator'
 import { useManagementActivityRepository } from '@/hooks/repositories/useManagementActivityRepository';
 import { getDeleteModalProps, useModalContext } from '@/hooks/useModalContext';
 import useIsMounted from '@/hooks/util/useIsMounted';
-import { ApiGen_Concepts_PropertyActivity } from '@/models/api/generated/ApiGen_Concepts_PropertyActivity';
+import { ApiGen_Concepts_ManagementActivity } from '@/models/api/generated/ApiGen_Concepts_ManagementActivity';
+
+import ManagementStatusUpdateSolver from '../../fileDetails/detail/ManagementStatusUpdateSolver';
 
 export interface IPropertyManagementActivitiesListContainerProps {
   managementFileId: number;
+  statusSolver: ManagementStatusUpdateSolver;
   View: React.FC<IManagementActivitiesListViewProps>;
 }
 
 const ManagementFileActivitiesListContainer: React.FunctionComponent<
   IPropertyManagementActivitiesListContainerProps
-> = ({ managementFileId, View }) => {
+> = ({ managementFileId, statusSolver, View }) => {
   const isMounted = useIsMounted();
   const { setModalContent, setDisplayModal } = useModalContext();
   const [propertyActivities, setPropertyActivities] = useState<PropertyActivityRow[]>([]);
   const { staleLastUpdatedBy } = useContext(SideBarContext);
-  const [sort, setSort] = useState<TableSort<ApiGen_Concepts_PropertyActivity>>({});
+  const [sort, setSort] = useState<TableSort<ApiGen_Concepts_ManagementActivity>>({});
 
   const pathGenerator = usePathGenerator();
 
@@ -62,10 +65,13 @@ const ManagementFileActivitiesListContainer: React.FunctionComponent<
     pathGenerator.showDetail('management', managementFileId, 'activities', activityId, false);
   };
 
+  const canEditActivities: boolean = statusSolver?.canEditActivities();
+
   return (
     <View
       isLoading={loading || deletingActivity}
       propertyActivities={propertyActivities}
+      canEditActivities={canEditActivities}
       setSort={setSort}
       sort={sort}
       onCreate={onCreate}

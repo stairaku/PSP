@@ -19,15 +19,17 @@ import usePathGenerator from '@/features/mapSideBar/shared/sidebarPathGenerator'
 import { StyledFormWrapper } from '@/features/mapSideBar/shared/styles';
 import useKeycloakWrapper from '@/hooks/useKeycloakWrapper';
 import { ApiGen_CodeTypes_DocumentRelationType } from '@/models/api/generated/ApiGen_CodeTypes_DocumentRelationType';
-import { ApiGen_Concepts_PropertyActivity } from '@/models/api/generated/ApiGen_Concepts_PropertyActivity';
-import { ApiGen_Concepts_PropertyActivityInvoice } from '@/models/api/generated/ApiGen_Concepts_PropertyActivityInvoice';
+import { ApiGen_Concepts_ManagementActivity } from '@/models/api/generated/ApiGen_Concepts_ManagementActivity';
+import { ApiGen_Concepts_ManagementActivityInvoice } from '@/models/api/generated/ApiGen_Concepts_ManagementActivityInvoice';
 
 export interface IFileActivityDetailViewProps {
   managementId: number;
-  activity: ApiGen_Concepts_PropertyActivity | null;
-  onClose: () => void;
+  activity: ApiGen_Concepts_ManagementActivity | null;
   loading: boolean;
   show: boolean;
+  canEditDocuments: boolean;
+  canEditActivity: boolean;
+  onClose: () => void;
   setShow: (show: boolean) => void;
 }
 
@@ -53,10 +55,11 @@ export const FileActivityDetailView: React.FunctionComponent<
     propertyId: ap.propertyId,
     propertyName: null,
     rowVersion: null,
+    isActive: null,
   }));
 
   if (props.activity !== null) {
-    const invoices: ApiGen_Concepts_PropertyActivityInvoice[] = props.activity.invoices ?? [];
+    const invoices: ApiGen_Concepts_ManagementActivityInvoice[] = props.activity.invoices ?? [];
 
     return (
       <ReactVisibilitySensor
@@ -80,7 +83,7 @@ export const FileActivityDetailView: React.FunctionComponent<
               <StyledSummarySection>
                 <LoadingBackdrop show={props.loading} />
                 <StyledEditWrapper className="mr-3 my-1">
-                  {hasClaim(Claims.MANAGEMENT_EDIT) && (
+                  {hasClaim(Claims.MANAGEMENT_EDIT) && props.canEditActivity && (
                     <EditButton
                       title="Edit File Property Activity"
                       onClick={() => {
@@ -106,9 +109,9 @@ export const FileActivityDetailView: React.FunctionComponent<
                 </Section>
                 <PropertyActivityDetailsSubView activity={props.activity} />
 
-                {invoices.map((x: ApiGen_Concepts_PropertyActivityInvoice, index: number) => (
+                {invoices.map((x: ApiGen_Concepts_ManagementActivityInvoice, index: number) => (
                   <InvoiceView
-                    key={`activity-${x.propertyActivityId}-invoice-${x.id}`}
+                    key={`activity-${x.managementActivityId}-invoice-${x.id}`}
                     activityInvoice={x}
                     index={index}
                   />
@@ -122,6 +125,7 @@ export const FileActivityDetailView: React.FunctionComponent<
               parentId={props.activity?.id.toString() ?? ''}
               addButtonText="Add a Management Document"
               relationshipType={ApiGen_CodeTypes_DocumentRelationType.ManagementActivities}
+              disableAdd={!props.canEditDocuments}
             />
             <DocumentActivityListContainer
               title={'Related Documents'}

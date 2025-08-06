@@ -2,13 +2,8 @@ import React, { useContext, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useMapStateMachine } from '@/components/common/mapFSM/MapStateMachineContext';
-import { NoteTypes } from '@/constants';
 import { Claims } from '@/constants/claims';
 import { FileTabs, FileTabType, TabFileView } from '@/features/mapSideBar/shared/detail/FileTabs';
-import NoteListContainer from '@/features/notes/list/NoteListContainer';
-import NoteListView from '@/features/notes/list/NoteListView';
-import { PropertyNoteSummaryContainer } from '@/features/notes/list/PropertyNoteSummaryContainer';
-import { PropertyNoteSummaryView } from '@/features/notes/list/PropertyNoteSummaryView';
 import useKeycloakWrapper from '@/hooks/useKeycloakWrapper';
 import { ApiGen_Concepts_ManagementFile } from '@/models/api/generated/ApiGen_Concepts_ManagementFile';
 import { isValidId } from '@/utils';
@@ -17,7 +12,9 @@ import { SideBarContext } from '../../context/sidebarContext';
 import usePathGenerator from '../../shared/sidebarPathGenerator';
 import ManagementDocumentsTab from '../../shared/tabs/ManagementDocumentsTab';
 import ActivitiesTab from './activities/ActivitiesTab';
+import ManagementSummaryContainer from './fileDetails/detail/ManagementSummaryContainer';
 import ManagementSummaryView from './fileDetails/detail/ManagementSummaryView';
+import ManagementFileNotesTab from './notes/ManagementFileNotesTab';
 
 export interface IManagementFileTabsProps {
   managementFile?: ApiGen_Concepts_ManagementFile;
@@ -55,7 +52,11 @@ export const ManagementFileTabs: React.FC<IManagementFileTabsProps> = ({
 
   tabViews.push({
     content: (
-      <ManagementSummaryView managementFile={managementFile} onEdit={() => setIsEditing(true)} />
+      <ManagementSummaryContainer
+        managementFile={managementFile}
+        onFileEdit={() => setIsEditing(true)}
+        View={ManagementSummaryView}
+      />
     ),
     key: FileTabType.FILE_DETAILS,
     name: 'File Details',
@@ -71,7 +72,9 @@ export const ManagementFileTabs: React.FC<IManagementFileTabsProps> = ({
 
   if (isValidId(managementFile?.id) && hasClaim(Claims.DOCUMENT_VIEW)) {
     tabViews.push({
-      content: <ManagementDocumentsTab fileId={managementFile.id} onSuccess={onChildSuccess} />,
+      content: (
+        <ManagementDocumentsTab managementFile={managementFile} onSuccess={onChildSuccess} />
+      ),
       key: FileTabType.DOCUMENTS,
       name: 'Documents',
     });
@@ -80,19 +83,7 @@ export const ManagementFileTabs: React.FC<IManagementFileTabsProps> = ({
   if (isValidId(managementFile?.id) && hasClaim(Claims.NOTE_VIEW)) {
     tabViews.push({
       content: (
-        <>
-          <NoteListContainer
-            type={NoteTypes.Management_File}
-            entityId={managementFile?.id}
-            onSuccess={onChildSuccess}
-            NoteListView={NoteListView}
-          />
-          <PropertyNoteSummaryContainer
-            fileProperties={managementFile?.fileProperties ?? []}
-            onSuccess={onChildSuccess}
-            View={PropertyNoteSummaryView}
-          />
-        </>
+        <ManagementFileNotesTab managementFile={managementFile} onSuccess={onChildSuccess} />
       ),
       key: FileTabType.NOTES,
       name: 'Notes',

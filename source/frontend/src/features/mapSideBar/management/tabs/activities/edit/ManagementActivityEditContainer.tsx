@@ -4,8 +4,9 @@ import { SideBarContext } from '@/features/mapSideBar/context/sidebarContext';
 import useActivityContactRetriever from '@/features/mapSideBar/property/tabs/propertyDetailsManagement/activity/hooks';
 import usePathGenerator from '@/features/mapSideBar/shared/sidebarPathGenerator';
 import { useManagementActivityRepository } from '@/hooks/repositories/useManagementActivityRepository';
+import { ApiGen_Concepts_FileProperty } from '@/models/api/generated/ApiGen_Concepts_FileProperty';
+import { ApiGen_Concepts_ManagementActivity } from '@/models/api/generated/ApiGen_Concepts_ManagementActivity';
 import { ApiGen_Concepts_ManagementFile } from '@/models/api/generated/ApiGen_Concepts_ManagementFile';
-import { ApiGen_Concepts_PropertyActivity } from '@/models/api/generated/ApiGen_Concepts_PropertyActivity';
 import { SystemConstants, useSystemConstants } from '@/store/slices/systemConstants';
 import { getCurrentIsoDate } from '@/utils/dateUtils';
 import { exists, isValidId } from '@/utils/utils';
@@ -61,17 +62,33 @@ export const ManagementActivityEditContainer: React.FunctionComponent<
         }
         await fetchProviderContact(retrieved);
 
-        setInitialValues(ManagementActivityFormModel.fromApi(retrieved));
+        setInitialValues(
+          ManagementActivityFormModel.fromApi(retrieved, castedFile?.fileProperties),
+        );
       }
     } else {
       // Create activity flow
       const defaultModel = new ManagementActivityFormModel(null, managementFileId);
       defaultModel.activityStatusCode = 'NOTSTARTED';
       defaultModel.requestedDate = getCurrentIsoDate();
+      defaultModel.selectedProperties = (castedFile?.fileProperties ?? []).map(x => {
+        return {
+          id: x.id,
+          fileId: castedFile?.id,
+          propertyName: x.propertyName,
+          location: x.location,
+          displayOrder: x.displayOrder,
+          property: x.property,
+          propertyId: x.propertyId,
+        } as ApiGen_Concepts_FileProperty;
+      });
+
       setInitialValues(defaultModel);
     }
   }, [
     activityId,
+    castedFile?.fileProperties,
+    castedFile?.id,
     fetchMinistryContacts,
     fetchPartiesContact,
     fetchProviderContact,
@@ -84,8 +101,8 @@ export const ManagementActivityEditContainer: React.FunctionComponent<
   const gstDecimal = exists(gstConstant) ? parseFloat(gstConstant.value) * 0.01 : 0;
   const pstDecimal = exists(pstConstant) ? parseFloat(pstConstant.value) * 0.01 : 0;
 
-  const onSave = async (model: ApiGen_Concepts_PropertyActivity) => {
-    let result: ApiGen_Concepts_PropertyActivity | undefined = undefined;
+  const onSave = async (model: ApiGen_Concepts_ManagementActivity) => {
+    let result: ApiGen_Concepts_ManagementActivity | undefined = undefined;
     if (isValidId(model.id)) {
       result = await updateManagementActivity(managementFileId, model);
     } else {

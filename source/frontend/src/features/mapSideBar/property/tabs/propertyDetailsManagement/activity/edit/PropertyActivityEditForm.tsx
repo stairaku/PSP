@@ -25,7 +25,7 @@ import SaveCancelButtons from '@/features/leases/SaveCancelButtons';
 import { StyledFormWrapper } from '@/features/mapSideBar/shared/styles';
 import useLookupCodeHelpers from '@/hooks/useLookupCodeHelpers';
 import { useModalManagement } from '@/hooks/useModalManagement';
-import { ApiGen_Concepts_PropertyActivity } from '@/models/api/generated/ApiGen_Concepts_PropertyActivity';
+import { ApiGen_Concepts_ManagementActivity } from '@/models/api/generated/ApiGen_Concepts_ManagementActivity';
 import { ILookupCode } from '@/store/slices/lookupCodes';
 import { exists, isValidId } from '@/utils';
 import { mapLookupCode } from '@/utils/mapLookupCode';
@@ -46,7 +46,7 @@ export interface IPropertyActivityEditFormProps {
   onCancel: () => void;
   onClose: () => void;
   setShow: (show: boolean) => void;
-  onSave: (model: ApiGen_Concepts_PropertyActivity) => Promise<void>;
+  onSave: (model: ApiGen_Concepts_ManagementActivity) => Promise<void>;
 }
 
 export const PropertyActivityEditForm: React.FunctionComponent<
@@ -169,11 +169,7 @@ export const PropertyActivityEditForm: React.FunctionComponent<
                             placeholder=""
                           />
                         </SectionField>
-                        <SectionField
-                          label="Requested added date"
-                          contentWidth={{ xs: 7 }}
-                          required
-                        >
+                        <SectionField label="Commencement" contentWidth={{ xs: 7 }} required>
                           <FastDatePicker field="requestedDate" formikProps={formikProps} />
                         </SectionField>
                         <SectionField
@@ -195,13 +191,13 @@ export const PropertyActivityEditForm: React.FunctionComponent<
                           />
                         </SectionField>
                         <SectionField
-                          label="Requestor"
+                          label="Contact manager"
                           contentWidth={{ xs: 7 }}
                           tooltip="Document the source of the request by entering the name of the person, organization or other entity from which the request has been received"
                         >
                           <Input field="requestedSource" />
                         </SectionField>
-                        <SectionField label="Involved parties" contentWidth={{ xs: 8 }}>
+                        <SectionField label="External contacts" contentWidth={{ xs: 8 }}>
                           <ContactListForm
                             field="involvedParties"
                             formikProps={formikProps}

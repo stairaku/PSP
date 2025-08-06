@@ -12,6 +12,7 @@ using Pims.Core.Security;
 using Pims.Dal.Entities;
 using Pims.Dal.Entities.Models;
 using Pims.Dal.Exceptions;
+using Pims.Dal.Helpers.Extensions;
 using Pims.Dal.Repositories;
 
 namespace Pims.Api.Services
@@ -26,9 +27,9 @@ namespace Pims.Api.Services
         private readonly IPropertyService _propertyService;
         private readonly ILookupRepository _lookupRepository;
         private readonly INoteRelationshipRepository<PimsManagementFileNote> _entityNoteRepository;
-        private readonly IManagementStatusSolver _managementStatusSolver;
+        private readonly IManagementFileStatusSolver _managementStatusSolver;
         private readonly IPropertyOperationService _propertyOperationService;
-        private readonly IPropertyActivityRepository _propertyActivityRepository;
+        private readonly IManagementActivityRepository _managementActivityRepository;
 
         public ManagementFileService(
             ClaimsPrincipal user,
@@ -39,9 +40,9 @@ namespace Pims.Api.Services
             IPropertyService propertyService,
             ILookupRepository lookupRepository,
             INoteRelationshipRepository<PimsManagementFileNote> entityNoteRepository,
-            IManagementStatusSolver managementStatusSolver,
+            IManagementFileStatusSolver managementStatusSolver,
             IPropertyOperationService propertyOperationService,
-            IPropertyActivityRepository propertyActivityRepository)
+            IManagementActivityRepository managementActivityRepository)
         {
             _user = user;
             _logger = logger;
@@ -53,7 +54,7 @@ namespace Pims.Api.Services
             _entityNoteRepository = entityNoteRepository;
             _managementStatusSolver = managementStatusSolver;
             _propertyOperationService = propertyOperationService;
-            _propertyActivityRepository = propertyActivityRepository;
+            _managementActivityRepository = managementActivityRepository;
         }
 
         public PimsManagementFile Add(PimsManagementFile managementFile, IEnumerable<UserOverrideCode> userOverrides)
@@ -71,6 +72,7 @@ namespace Pims.Api.Services
             // Update marker locations in the context of this file
             foreach (var incomingManagementProperty in managementFile.PimsManagementFileProperties)
             {
+                incomingManagementProperty.IsActive = true;
                 _propertyService.PopulateNewFileProperty(incomingManagementProperty);
             }
 
@@ -105,10 +107,8 @@ namespace Pims.Api.Services
             ValidateName(managementFile);
 
             ManagementFileStatusTypes? currentManagementStatus = GetCurrentManagementStatus(managementFile.Internal_Id);
-            if (!_managementStatusSolver.CanEditDetails(currentManagementStatus) && !_user.HasPermission(Permissions.SystemAdmin))
-            {
-                throw new BusinessRuleViolationException("The file you are editing is not active, so you cannot save changes. Refresh your browser to see file state.");
-            }
+            ManagementFileStatusTypes newManagementStatus = (ManagementFileStatusTypes)Enum.Parse(typeof(ManagementFileStatusTypes), managementFile.ManagementFileStatusTypeCode);
+            ValidateStatus(currentManagementStatus, newManagementStatus);
 
             ValidateVersion(id, managementFile.ConcurrencyControlNumber);
 
@@ -198,6 +198,13 @@ namespace Pims.Api.Services
                         needsUpdate = true;
                     }
 
+                    if (incomingManagementProperty.IsActive != existingProperty.IsActive)
+                    {
+                        existingProperty.IsActive = incomingManagementProperty.IsActive;
+                        AddPropertyActiveNote(incomingManagementProperty);
+                        needsUpdate = true;
+                    }
+
                     var incomingGeom = incomingManagementProperty.Location;
                     var existingGeom = existingProperty.Location;
                     if (existingGeom is null || (incomingGeom is not null && !existingGeom.EqualsExact(incomingGeom)))
@@ -219,7 +226,8 @@ namespace Pims.Api.Services
                 }
             }
 
-            IEnumerable<PimsPropPropActivity> fileActivityProperties = _propertyActivityRepository.GetActivitiesByManagementFile(managementFile.Internal_Id).SelectMany(pa => pa.PimsPropPropActivities);
+            IEnumerable<PimsManagementActivityProperty> fileActivityProperties = _managementActivityRepository.GetActivitiesByManagementFile(managementFile.Internal_Id).SelectMany(pa => pa.PimsManagementActivityProperties);
+
             // The ones not on the new set should be deleted
             List<PimsManagementFileProperty> differenceSet = currentFileProperties.Where(x => !managementFile.PimsManagementFileProperties.Any(y => y.Internal_Id == x.Internal_Id)).ToList();
             foreach (var deletedProperty in differenceSet)
@@ -257,12 +265,83 @@ namespace Pims.Api.Services
             return _managementFileRepository.GetPageDeep(filter);
         }
 
+        public IEnumerable<PimsManagementFileContact> GetContacts(long id)
+        {
+            _logger.LogInformation("Getting management file contacts");
+            _user.ThrowIfNotAuthorized(Permissions.ManagementView);
+
+            return _managementFileRepository.GetContacts(id);
+        }
+
+        public PimsManagementFileContact GetContact(long managementFileId, long contactId)
+        {
+            _logger.LogInformation("Getting management file contact");
+            _user.ThrowIfNotAuthorized(Permissions.ManagementView);
+
+            return _managementFileRepository.GetContact(managementFileId, contactId);
+        }
+
+        public PimsManagementFileContact AddContact(PimsManagementFileContact contact)
+        {
+            _logger.LogInformation("Creating file contact");
+            _user.ThrowIfNotAuthorized(Permissions.ManagementEdit);
+
+            _managementFileRepository.AddContact(contact);
+            _managementActivityRepository.CommitTransaction();
+
+            return contact;
+        }
+
+        public PimsManagementFileContact UpdateContact(PimsManagementFileContact contact)
+        {
+            _logger.LogInformation("Updating file contact...");
+            _user.ThrowIfNotAuthorized(Permissions.ManagementEdit);
+
+            _managementFileRepository.UpdateContact(contact);
+            _managementActivityRepository.CommitTransaction();
+
+            return contact;
+        }
+
+        public bool DeleteContact(long managementFileId, long contactId)
+        {
+            _logger.LogInformation("Deleting file contact...");
+            _user.ThrowIfNotAuthorized(Permissions.ManagementEdit);
+
+            _managementFileRepository.DeleteContact(managementFileId, contactId);
+            _managementActivityRepository.CommitTransaction();
+
+            return true;
+        }
+
         private static void ValidateStaff(PimsManagementFile managementFile)
         {
             bool duplicate = managementFile.PimsManagementFileTeams.GroupBy(p => $"{p.ManagementFileProfileTypeCode}-O-{p.OrganizationId}-P-{p.PersonId}").Any(g => g.Count() > 1);
             if (duplicate)
             {
                 throw new BadRequestException("Invalid Management team, a team member can only be added to a role once.");
+            }
+        }
+
+        private void ValidateStatus(ManagementFileStatusTypes? currentManagementStatus, ManagementFileStatusTypes newManagementStatus)
+        {
+            // All users can change states back to Active or Draft, from Hold, Cancelled.
+            if ((currentManagementStatus == ManagementFileStatusTypes.HOLD || currentManagementStatus == ManagementFileStatusTypes.CANCELLED)
+                && (newManagementStatus == ManagementFileStatusTypes.ACTIVE || newManagementStatus == ManagementFileStatusTypes.DRAFT))
+            {
+                return;
+            }
+
+            // Not Editable and Admin protected must have Admin
+            if (!_managementStatusSolver.CanEditDetails(currentManagementStatus) && _managementStatusSolver.IsAdminProtected(currentManagementStatus) && !_user.HasPermission(Permissions.SystemAdmin))
+            {
+                throw new BusinessRuleViolationException("The file you are editing is not active, only an Administrator may update this file to an Active status.");
+            }
+
+            // Not Editable -- Status must be updated first
+            if (!_managementStatusSolver.CanEditDetails(currentManagementStatus) && !_managementStatusSolver.CanEditDetails(newManagementStatus))
+            {
+                throw new BusinessRuleViolationException("The file you are editing is not active, so you cannot save changes. Refresh your browser to see file state.");
             }
         }
 
@@ -285,7 +364,7 @@ namespace Pims.Api.Services
             var currentProperties = _managementFilePropertyRepository.GetPropertiesByManagementFileId(incomingManagementFile.Internal_Id);
 
             // The following checks result in hard STOP errors
-            if (isFileClosing && currentProperties.Any(p => !p.Property.IsOwned))
+            if (isFileClosing && currentProperties is not null && currentProperties.Any(p => !p.Property.IsOwned))
             {
                 throw new BusinessRuleViolationException("You have one or more properties attached to this Management file that is NOT in the \"Core Inventory\" (i.e. owned by BCTFA and/or HMK). To complete this file you must either, remove these non \"Non-Core Inventory\" properties, OR make sure the property is added to the PIMS inventory first.");
             }
@@ -314,6 +393,26 @@ namespace Pims.Api.Services
                 {
                     IsSystemGenerated = true,
                     NoteTxt = $"Management File status changed from {currentManagementFile.ManagementFileStatusTypeCodeNavigation.Description} to {newStatus.Description}",
+                    AppCreateTimestamp = DateTime.Now,
+                    AppCreateUserid = this._user.GetUsername(),
+                },
+            };
+
+            _entityNoteRepository.AddNoteRelationship(fileNoteInstance);
+        }
+
+        private void AddPropertyActiveNote(PimsManagementFileProperty updateManagementFileProperty)
+        {
+            string disabledOrEnabled = updateManagementFileProperty.IsActive ? "Enabled" : "Disabled";
+            PimsManagementFileNote fileNoteInstance = new()
+            {
+                ManagementFileId = updateManagementFileProperty.ManagementFileId,
+                AppCreateTimestamp = DateTime.Now,
+                AppCreateUserid = _user.GetUsername(),
+                Note = new PimsNote()
+                {
+                    IsSystemGenerated = true,
+                    NoteTxt = $"Management File property {(updateManagementFileProperty as IFilePropertyEntity).GetPropertyName()} {disabledOrEnabled}",
                     AppCreateTimestamp = DateTime.Now,
                     AppCreateUserid = this._user.GetUsername(),
                 },
@@ -418,5 +517,6 @@ namespace Pims.Api.Services
 
             return currentManagementFileStatus;
         }
+
     }
 }

@@ -23,7 +23,6 @@ import {
   PROP_MGMT_ACTIVITY_TYPES,
 } from '@/constants/API';
 import SaveCancelButtons from '@/features/leases/SaveCancelButtons';
-import { ActivityPropertyFormModel } from '@/features/mapSideBar/property/tabs/propertyDetailsManagement/activity/edit/models';
 import { ManagementActivitySubTypeModel } from '@/features/mapSideBar/property/tabs/propertyDetailsManagement/activity/models/ManagementActivitySubType';
 import { StyledFormWrapper } from '@/features/mapSideBar/shared/styles';
 import useLookupCodeHelpers from '@/hooks/useLookupCodeHelpers';
@@ -31,8 +30,8 @@ import { useModalManagement } from '@/hooks/useModalManagement';
 import useIsMounted from '@/hooks/util/useIsMounted';
 import { ApiGen_CodeTypes_ManagementActivityStatusTypes } from '@/models/api/generated/ApiGen_CodeTypes_ManagementActivityStatusTypes';
 import { ApiGen_Concepts_FileProperty } from '@/models/api/generated/ApiGen_Concepts_FileProperty';
+import { ApiGen_Concepts_ManagementActivity } from '@/models/api/generated/ApiGen_Concepts_ManagementActivity';
 import { ApiGen_Concepts_ManagementFile } from '@/models/api/generated/ApiGen_Concepts_ManagementFile';
-import { ApiGen_Concepts_PropertyActivity } from '@/models/api/generated/ApiGen_Concepts_PropertyActivity';
 import { ILookupCode } from '@/store/slices/lookupCodes';
 import { exists, isValidId } from '@/utils';
 import { mapLookupCode } from '@/utils/mapLookupCode';
@@ -52,7 +51,7 @@ export interface IManagementActivityEditFormProps {
   loading: boolean;
   show: boolean;
   setShow: (show: boolean) => void;
-  onSave: (model: ApiGen_Concepts_PropertyActivity) => Promise<void>;
+  onSave: (model: ApiGen_Concepts_ManagementActivity) => Promise<void>;
 }
 
 export const ManagementActivityEditForm: React.FunctionComponent<
@@ -115,18 +114,6 @@ export const ManagementActivityEditForm: React.FunctionComponent<
     [activitySubTypeCodes],
   );
 
-  const getSelectedProperties = (): ApiGen_Concepts_FileProperty[] => {
-    if (isValidId(initialValues.id)) {
-      return (
-        initialValues.activityProperties
-          .map(ap => managementFile.fileProperties?.find(fp => fp.propertyId === ap.propertyId))
-          .filter(exists) ?? []
-      );
-    }
-
-    return managementFile.fileProperties ?? [];
-  };
-
   useEffect(() => {
     if (activitySubTypeOptions === null && isMounted) {
       setManagementActivitySubTypeOptions(initialValues.activityTypeCode);
@@ -185,33 +172,11 @@ export const ManagementActivityEditForm: React.FunctionComponent<
                           <FilePropertiesTable
                             disabledSelection={false}
                             fileProperties={managementFile.fileProperties ?? []}
-                            selectedFileProperties={getSelectedProperties()}
+                            selectedFileProperties={formikProps.values.selectedProperties}
                             setSelectedFileProperties={(
                               fileProperties: ApiGen_Concepts_FileProperty[],
                             ) => {
-                              const activityProperties: ActivityPropertyFormModel[] =
-                                fileProperties.map(fileProperty => {
-                                  const matchingProperty =
-                                    formikProps.values.activityProperties.find(
-                                      ap => ap.propertyId === fileProperty.propertyId,
-                                    );
-
-                                  if (exists(matchingProperty)) {
-                                    return matchingProperty;
-                                  } else {
-                                    const newActivityProperty = new ActivityPropertyFormModel();
-                                    newActivityProperty.propertyId = fileProperty.propertyId;
-                                    newActivityProperty.propertyActivityId = isValidId(
-                                      formikProps.values?.id,
-                                    )
-                                      ? formikProps.values?.id
-                                      : 0;
-
-                                    return newActivityProperty;
-                                  }
-                                });
-
-                              formikProps.setFieldValue('activityProperties', activityProperties);
+                              formikProps.setFieldValue('selectedProperties', fileProperties);
                             }}
                           ></FilePropertiesTable>
                         </SectionField>

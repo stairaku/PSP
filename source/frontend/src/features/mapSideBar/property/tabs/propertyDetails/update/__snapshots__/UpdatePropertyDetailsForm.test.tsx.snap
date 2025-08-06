@@ -526,13 +526,13 @@ exports[`UpdatePropertyDetailsForm component > renders as expected 1`] = `
               >
                 <button
                   class="c6 Button c7 btn btn-link"
+                  data-testid="remove-button"
                   type="button"
                 >
                   <div
                     class="Button__value"
                   >
                     <svg
-                      data-testid="remove-button"
                       fill="currentColor"
                       height="2rem"
                       stroke="currentColor"
@@ -2600,41 +2600,6 @@ exports[`UpdatePropertyDetailsForm component > renders as expected 1`] = `
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-    <div
-      class="c1 form-section"
-    >
-      <h2
-        class="c2"
-      >
-        <div
-          class="no-gutters row"
-        >
-          <div
-            class="align-content-end col"
-          >
-            Comments
-          </div>
-        </div>
-      </h2>
-      <div
-        class="collapse show"
-      >
-        <div
-          class="textarea input form-group"
-        >
-          <textarea
-            class="form-control"
-            id="input-notes"
-            name="notes"
-            rows="4"
-            style="word-break: break-all;"
-            title="I edited this Test notes for this property - again"
-          >
-            I edited this Test notes for this property - again
-          </textarea>
         </div>
       </div>
     </div>
