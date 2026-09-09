@@ -110,7 +110,7 @@ namespace Pims.Api.Services
                 throw new BusinessRuleViolationException("The file you are editing is not active, so you cannot save changes. Refresh your browser to see file state.");
             }
 
-            currentLease.ThrowIfCannotEditLeaseFile(_user, _userRepository, _projectRepository, _lookupRepository);
+            currentLease?.ThrowIfCannotEditLeaseFile(_user, _userRepository, _projectRepository, _lookupRepository);
             _leasePaymentRepository.Delete(payment.Internal_Id);
             _leasePaymentRepository.CommitTransaction();
 
@@ -129,7 +129,7 @@ namespace Pims.Api.Services
                 throw new BusinessRuleViolationException("The file you are editing is not active, so you cannot save changes. Refresh your browser to see file state.");
             }
 
-            currentLease.ThrowIfCannotEditLeaseFile(_user, _userRepository, _projectRepository, _lookupRepository);
+            currentLease?.ThrowIfCannotEditLeaseFile(_user, _userRepository, _projectRepository, _lookupRepository);
             var updatedPayment = _leasePaymentRepository.Update(payment);
             _leasePaymentRepository.CommitTransaction();
 
@@ -148,7 +148,7 @@ namespace Pims.Api.Services
             }
 
             ValidatePaymentRules(payment);
-            currentLease.ThrowIfCannotEditLeaseFile(_user, _userRepository, _projectRepository, _lookupRepository);
+            currentLease?.ThrowIfCannotEditLeaseFile(_user, _userRepository, _projectRepository, _lookupRepository);
             var updatedPayment = _leasePaymentRepository.Add(payment);
             _leasePaymentRepository.CommitTransaction();
 
