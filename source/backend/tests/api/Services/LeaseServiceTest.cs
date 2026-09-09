@@ -26,6 +26,7 @@ namespace Pims.Api.Test.Services
     public class LeaseServiceTest
     {
         private const string ContractorNotInTeamError = "Contractor is not assigned to the Lease File's team or the associated Project's team";
+        private const string ContractorsCannotRemoveThemselvesError = "Contractors cannot remove themselves from a Lease File. Please contact the admin at pims@gov.bc.ca";
         private TestHelper _helper;
 
         public LeaseServiceTest()
@@ -778,7 +779,7 @@ namespace Pims.Api.Test.Services
             Action act = () => service.Update(lease, new List<UserOverrideCode>());
 
             // Assert
-            act.Should().Throw<ContractorNotInTeamException>().WithMessage("Contractors cannot remove themselves from a Lease File. Please contact the admin at pims@gov.bc.ca");
+            act.Should().Throw<ContractorNotInTeamException>().WithMessage(ContractorNotInTeamError);
             leaseRepository.Verify(x => x.Update(It.IsAny<PimsLease>(), It.IsAny<bool>()), Times.Never);
         }
 
@@ -990,7 +991,7 @@ namespace Pims.Api.Test.Services
             Action act = () => service.UpdateProperties(lease, new List<UserOverrideCode>());
 
             // Assert
-            act.Should().Throw<ContractorNotInTeamException>().WithMessage("Contractors cannot remove themselves from a Lease File. Please contact the admin at pims@gov.bc.ca");
+            act.Should().Throw<ContractorNotInTeamException>().WithMessage(ContractorNotInTeamError);
             propertyLeaseRepository.Verify(x => x.UpdatePropertyLeases(It.IsAny<long>(), It.IsAny<ICollection<PimsPropertyLease>>()), Times.Never);
         }
 
