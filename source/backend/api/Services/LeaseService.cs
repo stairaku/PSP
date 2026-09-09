@@ -497,8 +497,6 @@ namespace Pims.Api.Services
                 throw new BusinessRuleViolationException("The file you are editing is not active, so you cannot save changes. Refresh your browser to see file state.");
             }
 
-            //_user.ThrowInvalidAccessToLeaseFile(currentLease, _userRepository, _projectRepository);
-
             currentLease.ThrowIfCannotEditLeaseFile(_user, _userRepository, _projectRepository, _lookupRepository);
             bool deleteResult = _consultationRepository.TryDeleteConsultation(consultationId);
             _consultationRepository.CommitTransaction();
@@ -536,11 +534,7 @@ namespace Pims.Api.Services
 
         public bool CanEdit(PimsLease lease)
         {
-            return lease.CanEditLeaseFile(
-                _user,
-                _userRepository,
-                _projectRepository,
-                _lookupRepository);
+            return lease.CanEditLeaseFile(_user, _userRepository, _projectRepository, _lookupRepository);
         }
 
         /// <summary>

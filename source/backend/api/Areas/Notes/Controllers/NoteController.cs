@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Pims.Api.Constants;
+using Pims.Api.Helpers.Extensions;
 using Pims.Api.Models.Concepts.Note;
 using Pims.Api.Services;
 using Pims.Core.Api.Exceptions;
@@ -13,6 +15,7 @@ using Pims.Core.Extensions;
 using Pims.Core.Json;
 using Pims.Core.Security;
 using Pims.Dal.Entities;
+using Pims.Dal.Repositories;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Pims.Api.Areas.Notes.Controllers
@@ -32,6 +35,10 @@ namespace Pims.Api.Areas.Notes.Controllers
         private readonly INoteService _noteService;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
+        private readonly IUserRepository _userRepository;
+        private readonly ILookupRepository _lookupRepository;
+        private readonly IProjectRepository _projectRepository;
+        private readonly ILeaseRepository _leaseRepository;
         #endregion
 
         #region Constructors
@@ -42,12 +49,19 @@ namespace Pims.Api.Areas.Notes.Controllers
         /// <param name="noteService"></param>
         /// <param name="mapper"></param>
         /// <param name="logger"></param>
-        ///
-        public NoteController(INoteService noteService, IMapper mapper, ILogger<NoteController> logger)
+        /// <param name="userRepository"></param>
+        /// <param name="lookupRepository"></param>
+        /// <param name="projectRepository"></param>
+        /// <param name="leaseRepository"></param>
+        public NoteController(INoteService noteService, IMapper mapper, ILogger<NoteController> logger, IUserRepository userRepository, ILookupRepository lookupRepository, IProjectRepository projectRepository, ILeaseRepository leaseRepository)
         {
             _noteService = noteService;
             _mapper = mapper;
             _logger = logger;
+            _userRepository = userRepository;
+            _lookupRepository = lookupRepository;
+            _projectRepository = projectRepository;
+            _leaseRepository = leaseRepository;
         }
         #endregion
 
@@ -87,6 +101,9 @@ namespace Pims.Api.Areas.Notes.Controllers
                 case NoteType.Lease_File:
                     var leaseNoteEntity = _mapper.Map<PimsLeaseNote>(model);
                     var leaseNote = _noteService.AddLeaseNote(leaseNoteEntity);
+
+                    var currentLease = _leaseRepository.GetNoTracking(leaseNote.ParentId) ?? throw new InvalidDataException("Invalid lease");
+                    currentLease.ThrowIfCannotEditLeaseFile(User, _userRepository, _projectRepository, _lookupRepository);
                     return new JsonResult(_mapper.Map<EntityNoteModel>(leaseNote));
                 case NoteType.Project:
                     var projectNoteEntity = _mapper.Map<PimsProjectNote>(model);
