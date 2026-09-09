@@ -147,7 +147,9 @@ describe('ConsultationListView component', () => {
     ];
     const { getByRole } = setup({ props: { consultations } });
 
-    expect(getByRole('button', { name: 'Reminder for Lease Policy Expiry' })).toBeVisible();
+    expect(
+      getByRole('button', { name: 'Reminder for Lease First Nation Consultation' }),
+    ).toBeVisible();
   });
 
   it('does not display the reminder button for a First Nation consultation without a requested date', () => {
@@ -163,7 +165,9 @@ describe('ConsultationListView component', () => {
       props: { consultations: [{ ...consultation, requestedOn: null }] },
     });
 
-    expect(queryByRole('button', { name: 'Reminder for Lease Policy Expiry' })).toBeNull();
+    expect(
+      queryByRole('button', { name: 'Reminder for Lease First Nation Consultation' }),
+    ).toBeNull();
 
     rerender(
       <ConsultationListView
@@ -175,14 +179,18 @@ describe('ConsultationListView component', () => {
       />,
     );
 
-    expect(queryByRole('button', { name: 'Reminder for Lease Policy Expiry' })).toBeNull();
+    expect(
+      queryByRole('button', { name: 'Reminder for Lease First Nation Consultation' }),
+    ).toBeNull();
   });
 
   it('does not display the reminder button for consultation types other than First Nation', () => {
     const consultations = [{ ...getMockApiConsultation(), id: 1, requestedOn: '2024-01-01' }];
     const { queryByRole } = setup({ props: { consultations } });
 
-    expect(queryByRole('button', { name: 'Reminder for Lease Policy Expiry' })).toBeNull();
+    expect(
+      queryByRole('button', { name: 'Reminder for Lease First Nation Consultation' }),
+    ).toBeNull();
   });
 
   it('calls onEdit when clicked', async () => {
