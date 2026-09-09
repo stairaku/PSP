@@ -143,7 +143,7 @@ namespace Pims.Api.Services
             Logger.LogInformation("Uploading document for single Lease");
             User.ThrowIfNotAllAuthorized(Permissions.DocumentAdd, Permissions.LeaseEdit);
 
-            var currentLease = _leaseRepository.GetNoTracking(leaseId) ?? throw new InvalidDataException("Invalid lease");
+            var currentLease = _leaseRepository.GetNoTracking(leaseId) ?? throw new BadRequestException("Invalid lease");
             currentLease.ThrowIfCannotEditLeaseFile(User, _userRepository, _projectRepository, _lookupRepository);
 
             await UploadDocument(leaseId, uploadRequest, _leaseFileDocumentRepository);
@@ -203,7 +203,7 @@ namespace Pims.Api.Services
             Logger.LogInformation("Deleting PIMS document for single lease");
             User.ThrowIfNotAllAuthorized(Permissions.DocumentDelete, Permissions.LeaseEdit);
 
-            var currentLease = _leaseRepository.GetNoTracking(leaseDocument.FileId) ?? throw new InvalidDataException("Invalid lease");
+            var currentLease = _leaseRepository.GetNoTracking(leaseDocument.FileId) ?? throw new BadRequestException("Invalid lease");
             currentLease.ThrowIfCannotEditLeaseFile(User, _userRepository, _projectRepository, _lookupRepository);
             return await DeletePropertyDocumentAsync(leaseDocument, _leaseFileDocumentRepository);
         }

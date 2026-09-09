@@ -58,6 +58,22 @@ namespace Pims.Api.Helpers.Extensions
 
         public static void ThrowIfCannotEditLeaseFile(this PimsLease leaseFile, ClaimsPrincipal principal, IUserRepository userRepository, IProjectRepository projectRepository, ILookupRepository lookupRepository)
         {
+            ArgumentNullException.ThrowIfNull(principal);
+            ArgumentNullException.ThrowIfNull(leaseFile);
+
+            var pimsUser = userRepository.GetUserInfoByKeycloakUserId(principal.GetUserKey());
+
+            // Check if contractor is not in team
+            if (pimsUser?.IsContractor == true)
+            {
+                var project = leaseFile.ProjectId.HasValue ? projectRepository.TryGet(leaseFile.ProjectId.Value) : null;
+                if (!leaseFile.HasAccessToLeaseFile(pimsUser, project))
+                {
+                    throw new ContractorNotInTeamException("Contractor is not assigned to the Lease File's team or the associated Project's team");
+                }
+            }
+
+            // General edit access check
             if (!leaseFile.CanEditLeaseFile(
                 principal,
                 userRepository,
