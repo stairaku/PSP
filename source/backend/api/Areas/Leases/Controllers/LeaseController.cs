@@ -5,7 +5,6 @@ using MapsterMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Pims.Api.Helpers.Extensions;
 using Pims.Api.Models.Concepts.File;
 using Pims.Api.Models.Concepts.Lease;
 using Pims.Api.Services;
