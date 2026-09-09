@@ -20,7 +20,6 @@ export interface IContactListForm {
 export const ContactListForm: React.FunctionComponent<IContactListForm> = ({
   field,
   formikProps,
-  contactType,
   dataTestId,
 }) => {
   // clear out existing values instead of removing last item from array

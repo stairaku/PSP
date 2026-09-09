@@ -18,7 +18,7 @@ export interface IContactListForm {
 
 export const ContactListForm: React.FunctionComponent<
   React.PropsWithChildren<IContactListForm>
-> = ({ field, contactType, formikProps }) => {
+> = ({ field, formikProps }) => {
   // clear out existing values instead of removing last item from array
   const onRemove = (array: Array<any>, index: number, arrayHelpers: ArrayHelpers) => {
     if (array.length > 1) {
