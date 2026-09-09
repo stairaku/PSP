@@ -16,7 +16,7 @@ export interface INoteListContainerProps {
   entityId: number;
   View: React.FunctionComponent<React.PropsWithChildren<INoteListViewProps>>;
   statusSolver?: IUpdateNotesStrategy | null;
-  canEdit: boolean;
+  canEdit?: boolean;
   onSuccess?: () => void;
 }
 
