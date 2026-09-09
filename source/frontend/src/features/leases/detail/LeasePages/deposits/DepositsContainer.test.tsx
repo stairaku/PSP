@@ -29,13 +29,18 @@ const onSuccessMock = vi.fn();
 
 const mockAxios = new MockAdapter(axios);
 
-const setup = (renderOptions: RenderOptions & { lease?: LeaseFormModel; canEdit?: boolean } = {}): RenderResult => {
+const setup = (
+  renderOptions: RenderOptions & { lease?: LeaseFormModel; canEdit?: boolean } = {},
+): RenderResult => {
   // render component under test
   const result = render(
     <LeaseStateContext.Provider
       value={{
         lease: renderOptions?.lease
-          ? {... LeaseFormModel.toApi(renderOptions?.lease), canEdit: renderOptions.canEdit ?? true, }
+          ? {
+              ...LeaseFormModel.toApi(renderOptions?.lease),
+              canEdit: renderOptions.canEdit ?? true,
+            }
           : {
               ...getMockApiLease(),
               canEdit: renderOptions.canEdit ?? true,

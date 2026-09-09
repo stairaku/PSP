@@ -102,7 +102,7 @@ describe('PeriodsForm component', () => {
     mockAxios.resetHistory();
   });
   it('renders as expected', async () => {
-    const { component } = await setup({canEdit: false});
+    const { component } = await setup({ canEdit: false });
 
     expect(component.asFragment()).toMatchSnapshot();
   });
