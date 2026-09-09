@@ -43,7 +43,11 @@ export const ContactListForm: React.FunctionComponent<IContactListForm> = ({
                 <ContactInputContainer
                   field={`${field}[${index}]`}
                   View={ContactInputView}
-                  restrictContactType={contactType}
+                  restrictContactType={[
+                    RestrictContactType.ONLY_ORGANIZATIONS,
+                    RestrictContactType.ONLY_INDIVIDUALS,
+                    RestrictContactType.ONLY_PIMSUSERS,
+                  ]}
                 />
               </Col>
               {contacts.length > 1 && (
