@@ -243,7 +243,7 @@ namespace Pims.Api.Models.Concepts.Lease
         /// <summary>
         /// get/set - Wether the lease editable for the current user.
         /// </summary>
-        public bool CanEdit { get; set; }
+        public bool? CanEdit { get; set; }
         #endregion
     }
 }
