@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using Microsoft.Extensions.Logging;
@@ -49,7 +50,7 @@ namespace Pims.Api.Services
             _logger.LogInformation("Deleting period to lease with id: {id}", leaseId);
             ValidateDeletionRules(period);
 
-            var currentLease = _leaseService.GetById(leaseId);
+            var currentLease = _leaseService.GetById(leaseId) ?? throw new InvalidDataException("Invalid lease");
             var currentLeaseStatus = _leaseStatusSolver.GetCurrentLeaseStatus(currentLease?.LeaseStatusTypeCode);
             if (!_leaseStatusSolver.CanEditPayments(currentLeaseStatus))
             {
@@ -68,7 +69,7 @@ namespace Pims.Api.Services
             _logger.LogInformation("Updating period to lease with id: {id}", leaseId);
             ValidateUpdateRules(period, periodId);
 
-            var currentLease = _leaseService.GetById(leaseId);
+            var currentLease = _leaseService.GetById(leaseId) ?? throw new InvalidDataException("Invalid lease");
             var currentLeaseStatus = _leaseStatusSolver.GetCurrentLeaseStatus(currentLease?.LeaseStatusTypeCode);
             if (!_leaseStatusSolver.CanEditPayments(currentLeaseStatus))
             {
@@ -87,7 +88,7 @@ namespace Pims.Api.Services
             _logger.LogInformation("Adding period to lease with id: {id}", leaseId);
             ValidateAddRules(period);
 
-            var currentLease = _leaseService.GetById(leaseId);
+            var currentLease = _leaseService.GetById(leaseId) ?? throw new InvalidDataException("Invalid lease");
             var currentLeaseStatus = _leaseStatusSolver.GetCurrentLeaseStatus(currentLease?.LeaseStatusTypeCode);
             if (!_leaseStatusSolver.CanEditPayments(currentLeaseStatus))
             {

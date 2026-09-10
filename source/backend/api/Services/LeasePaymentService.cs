@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Claims;
 using Microsoft.Extensions.Logging;
 using Pims.Api.Helpers.Extensions;
@@ -103,14 +104,14 @@ namespace Pims.Api.Services
         {
             _logger.LogInformation("Deleting payment to lease with id: {id}", leaseId);
 
-            var currentLease = _leaseService.GetById(leaseId);
+            var currentLease = _leaseService.GetById(leaseId) ?? throw new InvalidDataException("Invalid lease");
             var currentLeaseStatus = _leaseStatusSolver.GetCurrentLeaseStatus(currentLease?.LeaseStatusTypeCode);
             if (!_leaseStatusSolver.CanEditPayments(currentLeaseStatus))
             {
                 throw new BusinessRuleViolationException("The file you are editing is not active, so you cannot save changes. Refresh your browser to see file state.");
             }
 
-            currentLease?.ThrowIfCannotEditLeaseFile(_user, _userRepository, _projectRepository, _lookupRepository);
+            currentLease.ThrowIfCannotEditLeaseFile(_user, _userRepository, _projectRepository, _lookupRepository);
             _leasePaymentRepository.Delete(payment.Internal_Id);
             _leasePaymentRepository.CommitTransaction();
 
@@ -122,7 +123,7 @@ namespace Pims.Api.Services
             _logger.LogInformation("Updating payment to lease with id: {id}", leaseId);
             ValidatePaymentRules(payment);
 
-            var currentLease = _leaseService.GetById(leaseId);
+            var currentLease = _leaseService.GetById(leaseId) ?? throw new InvalidDataException("Invalid lease");
             var currentLeaseStatus = _leaseStatusSolver.GetCurrentLeaseStatus(currentLease?.LeaseStatusTypeCode);
             if (!_leaseStatusSolver.CanEditPayments(currentLeaseStatus))
             {

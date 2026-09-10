@@ -145,8 +145,6 @@ namespace Pims.Api.Helpers.Extensions
             }
             else
             {
-                // Regular (non-contractor) users only need access to the lease region
-                //return leaseFile.IsUserAssignedToLeaseRegion(pimsUser);
                 return true;
             }
         }

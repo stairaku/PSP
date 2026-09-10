@@ -1,3 +1,4 @@
+using System.IO;
 using System.Security.Claims;
 using Pims.Api.Helpers.Extensions;
 using Pims.Core.Exceptions;
@@ -13,7 +14,7 @@ namespace Pims.Api.Services
         private readonly ISecurityDepositReturnRepository _securityDepositReturnRepository;
         private readonly ILeaseService _leaseService;
         private readonly ILeaseStatusSolver _leaseStatusSolver;
-         private readonly IUserRepository _userRepository;
+        private readonly IUserRepository _userRepository;
         private readonly ClaimsPrincipal _user;
         private readonly ILookupRepository _lookupRepository;
         private readonly IProjectRepository _projectRepository;
@@ -50,7 +51,7 @@ namespace Pims.Api.Services
         {
             _user.ThrowIfNotAuthorized(Permissions.LeaseEdit);
 
-            var currentLease = _leaseService.GetById(leaseId);
+            var currentLease = _leaseService.GetById(leaseId) ?? throw new InvalidDataException("Invalid lease");
             var currentLeaseStatus = _leaseStatusSolver.GetCurrentLeaseStatus(currentLease?.LeaseStatusTypeCode);
             if (!_leaseStatusSolver.CanEditDeposits(currentLeaseStatus))
             {
@@ -75,7 +76,7 @@ namespace Pims.Api.Services
         {
             _user.ThrowIfNotAuthorized(Permissions.LeaseEdit);
 
-            var currentLease = _leaseService.GetById(leaseId);
+            var currentLease = _leaseService.GetById(leaseId) ?? throw new InvalidDataException("Invalid lease");
             var currentLeaseStatus = _leaseStatusSolver.GetCurrentLeaseStatus(currentLease?.LeaseStatusTypeCode);
             if (!_leaseStatusSolver.CanEditDeposits(currentLeaseStatus))
             {

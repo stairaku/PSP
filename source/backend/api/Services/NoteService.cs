@@ -103,7 +103,7 @@ namespace Pims.Api.Services
         {
             leaseNote.ThrowIfNull(nameof(leaseNote));
             Logger.LogInformation("Adding note for lease with Id: {Id}", leaseNote.ParentId);
-            User.ThrowIfNotAuthorized(Permissions.NoteAdd);
+            User.ThrowIfNotAuthorized(Permissions.NoteAdd, Permissions.LeaseEdit);
 
             var currentLease = _leaseRepository.GetNoTracking(leaseNote.ParentId) ?? throw new InvalidDataException("Invalid lease");
             currentLease.ThrowIfCannotEditLeaseFile(User, _userRepository, _projectRepository, _lookupRepository);

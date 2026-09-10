@@ -155,7 +155,7 @@ namespace Pims.Api.Services
             _logger.LogInformation("Updating insurance on lease {leaseId}", leaseId);
             _user.ThrowIfNotAuthorized(Permissions.LeaseEdit);
 
-            var currentLease = _leaseRepository.GetNoTracking(leaseId);
+            var currentLease = _leaseRepository.GetNoTracking(leaseId) ?? throw new InvalidDataException("Invalid lease");
             currentLease.ThrowIfCannotEditLeaseFile(_user, _userRepository, _projectRepository, _lookupRepository);
 
             var currentLeaseStatus = _leaseStatusSolver.GetCurrentLeaseStatus(currentLease?.LeaseStatusTypeCode);
@@ -182,9 +182,8 @@ namespace Pims.Api.Services
         {
             _logger.LogInformation("Updating stakeholders on lease {leaseId}", leaseId);
             _user.ThrowIfNotAuthorized(Permissions.LeaseEdit);
-            //_user.ThrowInvalidAccessToLeaseFile(_userRepository, _leaseRepository, _projectRepository, leaseId);
 
-            var currentLease = _leaseRepository.GetNoTracking(leaseId);
+            var currentLease = _leaseRepository.GetNoTracking(leaseId) ?? throw new InvalidDataException("Invalid lease");
             var currentLeaseStatus = _leaseStatusSolver.GetCurrentLeaseStatus(currentLease?.LeaseStatusTypeCode);
             if (!_leaseStatusSolver.CanEditStakeholders(currentLeaseStatus))
             {
@@ -276,7 +275,7 @@ namespace Pims.Api.Services
             _logger.LogInformation("Updating lease properties with lease id {id}", lease.LeaseId);
             _user.ThrowIfNotAuthorized(Permissions.LeaseEdit, Permissions.PropertyView, Permissions.PropertyAdd);
 
-            var currentLease = _leaseRepository.GetNoTracking(lease.LeaseId);
+            var currentLease = _leaseRepository.GetNoTracking(lease.LeaseId) ?? throw new InvalidDataException("Invalid lease");
             var currentLeaseStatus = _leaseStatusSolver.GetCurrentLeaseStatus(currentLease?.LeaseStatusTypeCode);
 
             // Need to check that the user is able to access the current lease as well as has the region for the updated lease.
@@ -387,7 +386,7 @@ namespace Pims.Api.Services
             _user.ThrowIfNotAuthorized(Permissions.LeaseEdit);
             _user.ThrowInvalidAccessToLeaseFile(_userRepository, _leaseRepository, _projectRepository, leaseId);
 
-            var currentLease = _leaseRepository.GetNoTracking(leaseId);
+            var currentLease = _leaseRepository.GetNoTracking(leaseId) ?? throw new InvalidDataException("Invalid lease");
             var currentLeaseStatus = _leaseStatusSolver.GetCurrentLeaseStatus(currentLease?.LeaseStatusTypeCode);
             if (!_leaseStatusSolver.CanEditChecklists(currentLeaseStatus))
             {
@@ -450,7 +449,7 @@ namespace Pims.Api.Services
         {
             _user.ThrowIfNotAuthorized(Permissions.LeaseEdit);
 
-            var currentLease = _leaseRepository.GetNoTracking(consultation.LeaseId);
+            var currentLease = _leaseRepository.GetNoTracking(consultation.LeaseId) ?? throw new InvalidDataException("Invalid lease");
             var currentLeaseStatus = _leaseStatusSolver.GetCurrentLeaseStatus(currentLease?.LeaseStatusTypeCode);
             if (!_leaseStatusSolver.CanEditOrDeleteConsultation(currentLeaseStatus))
             {
@@ -469,7 +468,7 @@ namespace Pims.Api.Services
         {
             _user.ThrowIfNotAuthorized(Permissions.LeaseEdit);
 
-            var currentLease = _leaseRepository.GetNoTracking(consultation.LeaseId);
+            var currentLease = _leaseRepository.GetNoTracking(consultation.LeaseId) ?? throw new InvalidDataException("Invalid lease");
             var currentLeaseStatus = _leaseStatusSolver.GetCurrentLeaseStatus(currentLease?.LeaseStatusTypeCode);
             if (!_leaseStatusSolver.CanEditOrDeleteConsultation(currentLeaseStatus))
             {
@@ -490,7 +489,7 @@ namespace Pims.Api.Services
             _user.ThrowIfNotAuthorized(Permissions.LeaseEdit);
 
             var consultation = _consultationRepository.GetConsultationById(consultationId);
-            var currentLease = _leaseRepository.GetNoTracking(consultation.LeaseId);
+            var currentLease = _leaseRepository.GetNoTracking(consultation.LeaseId) ?? throw new InvalidDataException("Invalid lease");
             var currentLeaseStatus = _leaseStatusSolver.GetCurrentLeaseStatus(currentLease?.LeaseStatusTypeCode);
             if (!_leaseStatusSolver.CanEditOrDeleteConsultation(currentLeaseStatus))
             {

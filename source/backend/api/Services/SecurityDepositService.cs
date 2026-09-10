@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using Microsoft.Extensions.Logging;
@@ -51,7 +52,7 @@ namespace Pims.Api.Services
             _logger.LogInformation("Adding lease deposit for lease id {id}", leaseId);
             _user.ThrowIfNotAuthorized(Permissions.LeaseAdd);
 
-            var currentLease = _leaseService.GetById(leaseId);
+            var currentLease = _leaseService.GetById(leaseId) ?? throw new InvalidDataException("Invalid lease");
             var currentLeaseStatus = _leaseStatusSolver.GetCurrentLeaseStatus(currentLease?.LeaseStatusTypeCode);
             if (!_leaseStatusSolver.CanEditDeposits(currentLeaseStatus))
             {
@@ -70,7 +71,7 @@ namespace Pims.Api.Services
             _logger.LogInformation("Updating lease deposit for lease id {leaseid} deposit id {depositId}", leaseId, deposit.SecurityDepositId);
             _user.ThrowIfNotAuthorized(Permissions.LeaseEdit);
 
-            var currentLease = _leaseService.GetById(leaseId);
+            var currentLease = _leaseService.GetById(leaseId) ?? throw new InvalidDataException("Invalid lease");
             var currentLeaseStatus = _leaseStatusSolver.GetCurrentLeaseStatus(currentLease?.LeaseStatusTypeCode);
             if (!_leaseStatusSolver.CanEditDeposits(currentLeaseStatus))
             {
@@ -114,7 +115,7 @@ namespace Pims.Api.Services
             _user.ThrowIfNotAuthorized(Permissions.LeaseEdit);
             ValidateDeletionRules(deposit);
 
-            var currentLease = _leaseService.GetById(deposit.LeaseId);
+            var currentLease = _leaseService.GetById(deposit.LeaseId) ?? throw new InvalidDataException("Invalid lease");
             var currentLeaseStatus = _leaseStatusSolver.GetCurrentLeaseStatus(currentLease?.LeaseStatusTypeCode);
             if (!_leaseStatusSolver.CanEditDeposits(currentLeaseStatus))
             {

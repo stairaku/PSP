@@ -101,9 +101,6 @@ namespace Pims.Api.Areas.Notes.Controllers
                 case NoteType.Lease_File:
                     var leaseNoteEntity = _mapper.Map<PimsLeaseNote>(model);
                     var leaseNote = _noteService.AddLeaseNote(leaseNoteEntity);
-
-                    var currentLease = _leaseRepository.GetNoTracking(leaseNote.ParentId) ?? throw new InvalidDataException("Invalid lease");
-                    currentLease.ThrowIfCannotEditLeaseFile(User, _userRepository, _projectRepository, _lookupRepository);
                     return new JsonResult(_mapper.Map<EntityNoteModel>(leaseNote));
                 case NoteType.Project:
                     var projectNoteEntity = _mapper.Map<PimsProjectNote>(model);
