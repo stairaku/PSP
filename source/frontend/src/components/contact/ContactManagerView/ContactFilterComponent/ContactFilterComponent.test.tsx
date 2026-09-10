@@ -11,9 +11,20 @@ const setFilter = vi.fn();
 
 // render component under test
 const setup = (renderOptions: RenderOptions & IContactFilterComponentProps = { setFilter }) => {
-  const { filter, setFilter: setFilterFn, restrictContactType, showActiveSelector = true, ...rest } = renderOptions;
+  const {
+    filter,
+    setFilter: setFilterFn,
+    restrictContactType,
+    showActiveSelector = true,
+    ...rest
+  } = renderOptions;
   const utils = render(
-    <ContactFilterComponent filter={filter} setFilter={setFilterFn} restrictContactType={restrictContactType} showActiveSelector={showActiveSelector} />,
+    <ContactFilterComponent
+      filter={filter}
+      setFilter={setFilterFn}
+      restrictContactType={restrictContactType}
+      showActiveSelector={showActiveSelector}
+    />,
     {
       ...rest,
     },

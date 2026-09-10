@@ -125,18 +125,15 @@ describe('AddLeaseTeamSubForm component', () => {
     await act(async () => userEvent.click(getByTestId('add-team-member')));
 
     await act(async () =>
-      selectOptions(
-        'team.0.contactTypeCode',
-        ApiGen_CodeTypes_LeaseTeamProfileTypes.PROPANALYST,
-      ),
+      selectOptions('team.0.contactTypeCode', ApiGen_CodeTypes_LeaseTeamProfileTypes.PROPANALYST),
     );
 
     expect(container.querySelector('#input-searchBy-pimsusers')).not.toBeNull();
     expect(container.querySelector('#input-searchBy-persons')).toBeNull();
     expect(container.querySelector('#input-searchBy-organizations')).toBeNull();
-});
+  });
 
-it('allows all contact types for unrestricted team profiles', async () => {
+  it('allows all contact types for unrestricted team profiles', async () => {
     const { getByTestId, container } = setup({
       initialForm: testForm,
     });
@@ -144,10 +141,7 @@ it('allows all contact types for unrestricted team profiles', async () => {
     await act(async () => userEvent.click(getByTestId('add-team-member')));
 
     await act(async () =>
-      selectOptions(
-        'team.0.contactTypeCode',
-        ApiGen_CodeTypes_LeaseTeamProfileTypes.MOTTLAWYER,
-      ),
+      selectOptions('team.0.contactTypeCode', ApiGen_CodeTypes_LeaseTeamProfileTypes.MOTTLAWYER),
     );
 
     expect(container.querySelector('#input-searchBy-pimsusers')).not.toBeNull();
