@@ -1797,7 +1797,7 @@ namespace Pims.Api.Test.Services
             Action act = () => service.AddConsultation(new PimsLeaseConsultation());
 
             // Assert
-            act.Should().Throw<NotAuthorizedException>().WithMessage(ContractorNotInTeamError);
+            act.Should().Throw<ContractorNotInTeamException>().WithMessage(ContractorNotInTeamError);
             consultationRepository.Verify(x => x.AddConsultation(It.IsAny<PimsLeaseConsultation>()), Times.Never);
         }
 
@@ -1892,7 +1892,7 @@ namespace Pims.Api.Test.Services
             Action act = () => service.UpdateConsultation(new PimsLeaseConsultation());
 
             // Assert
-            act.Should().Throw<NotAuthorizedException>().WithMessage(ContractorNotInTeamError);
+            act.Should().Throw<ContractorNotInTeamException>().WithMessage(ContractorNotInTeamError);
             consultationRepository.Verify(x => x.UpdateConsultation(It.IsAny<PimsLeaseConsultation>()), Times.Never);
         }
 
@@ -1988,7 +1988,7 @@ namespace Pims.Api.Test.Services
             Action act = () => service.DeleteConsultation(1);
 
             // Assert
-            act.Should().Throw<NotAuthorizedException>().WithMessage(ContractorNotInTeamError);
+            act.Should().Throw<ContractorNotInTeamException>().WithMessage(ContractorNotInTeamError);
             consultationRepository.Verify(x => x.TryDeleteConsultation(It.IsAny<long>()), Times.Never);
         }
 
@@ -2072,7 +2072,7 @@ namespace Pims.Api.Test.Services
             Action act = () => service.UpdateInsuranceByLeaseId(1, new List<PimsInsurance>());
 
             // Assert
-            act.Should().Throw<NotAuthorizedException>().WithMessage(ContractorNotInTeamError);
+            act.Should().Throw<ContractorNotInTeamException>().WithMessage(ContractorNotInTeamError);
             leaseRepository.Verify(x => x.UpdateLeaseInsurances(It.IsAny<long>(), It.IsAny<IEnumerable<PimsInsurance>>()), Times.Never);
         }
 
@@ -2178,7 +2178,7 @@ namespace Pims.Api.Test.Services
             Action act = () => service.UpdateStakeholdersByLeaseId(1, new List<PimsLeaseStakeholder>());
 
             // Assert
-            act.Should().Throw<NotAuthorizedException>().WithMessage(ContractorNotInTeamError);
+            act.Should().Throw<ContractorNotInTeamException>().WithMessage(ContractorNotInTeamError);
             stakeholderRepository.Verify(x => x.Update(It.IsAny<long>(), It.IsAny<IEnumerable<PimsLeaseStakeholder>>()), Times.Never);
         }
         #endregion

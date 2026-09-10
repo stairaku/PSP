@@ -1696,6 +1696,7 @@ namespace Pims.Api.Test.Services
 
             PimsLeaseDocument doc = new()
             {
+                LeaseId=1,
                 Internal_Id = 1,
                 DocumentId = 2,
             };
@@ -1711,39 +1712,89 @@ namespace Pims.Api.Test.Services
         public async void Delete_LeaseDocument_Success_Status_Success()
         {
             // Arrange
-            var service = this.CreateDocumentFileServiceWithPermissions(Permissions.DocumentDelete, Permissions.LeaseEdit);
+            var service = this.CreateDocumentFileServiceWithPermissions(
+                Permissions.DocumentDelete,
+                Permissions.LeaseEdit);
+
             var documentService = this._helper.GetService<Mock<IDocumentService>>();
             var documentRepository = this._helper.GetService<Mock<IDocumentRepository>>();
             var documentQueueRepository = this._helper.GetService<Mock<IDocumentQueueRepository>>();
+            var leaseDocumentRepository =
+                this._helper.GetService<Mock<IDocumentRelationshipRepository<PimsLeaseDocument>>>();
 
-            var leaseDocumentRepository = this._helper.GetService<Mock<IDocumentRelationshipRepository<PimsLeaseDocument>>>();
+            var lease = EntityHelper.CreateLease(1);
+            lease.RegionCode = 1;
 
-            documentRepository.Setup(x => x.Find(It.IsAny<long>())).Returns(new PimsDocument() { DocumentId = 2, MayanId = 200 });
-            documentRepository.Setup(x => x.BeginTransaction()).Returns(new Mock<IDbContextTransaction>().Object);
-            documentService.Setup(x => x.DeleteMayanStorageDocumentAsync(It.IsAny<long>())).ReturnsAsync(new ExternalResponse<string>()
+            var user = EntityHelper.CreateUser("Test");
+            user.PimsRegionUsers.Add(new PimsRegionUser
             {
-                Status = ExternalResponseStatus.Success,
-                HttpStatusCode = System.Net.HttpStatusCode.OK,
+                RegionCode = 1,
             });
-            documentRepository.Setup(x => x.Update(It.IsAny<PimsDocument>(), false)).Returns(new PimsDocument() { DocumentId = 2, MayanId = null });
-            documentQueueRepository.Setup(x => x.GetByDocumentId(It.IsAny<long>())).Returns(new PimsDocumentQueue()
-            {
-                DocumentId = 2,
-                DocumentQueueStatusTypeCode = DocumentQueueStatusTypes.SUCCESS.ToString(),
-            });
-            documentQueueRepository.Setup(x => x.Delete(It.IsAny<PimsDocumentQueue>())).Returns(true);
-            leaseDocumentRepository.Setup(x => x.DeleteDocument(It.IsAny<PimsLeaseDocument>()));
-            documentRepository.Setup(x => x.DeleteDocument(It.IsAny<PimsDocument>())).Returns(true);
+
+            var leaseRepository = this._helper.GetService<Mock<ILeaseRepository>>();
+            leaseRepository
+                .Setup(x => x.GetNoTracking(lease.Internal_Id))
+                .Returns(lease);
+
+            var userRepository = this._helper.GetService<Mock<IUserRepository>>();
+            userRepository
+                .Setup(x => x.GetUserInfoByKeycloakUserId(It.IsAny<Guid>()))
+                .Returns(user);
+
+            var lookupRepository = this._helper.GetService<Mock<ILookupRepository>>();
+            lookupRepository
+                .Setup(x => x.GetAllRegions())
+                .Returns(new List<PimsRegion>());
+
+            documentRepository
+                .Setup(x => x.Find(It.IsAny<long>()))
+                .Returns(new PimsDocument() { DocumentId = 2, MayanId = 200 });
+
+            documentRepository
+                .Setup(x => x.BeginTransaction())
+                .Returns(new Mock<IDbContextTransaction>().Object);
+
+            documentService
+                .Setup(x => x.DeleteMayanStorageDocumentAsync(It.IsAny<long>()))
+                .ReturnsAsync(new ExternalResponse<string>()
+                {
+                    Status = ExternalResponseStatus.Success,
+                    HttpStatusCode = System.Net.HttpStatusCode.OK,
+                });
+
+            documentRepository
+                .Setup(x => x.Update(It.IsAny<PimsDocument>(), false))
+                .Returns(new PimsDocument() { DocumentId = 2, MayanId = null });
+
+            documentQueueRepository
+                .Setup(x => x.GetByDocumentId(It.IsAny<long>()))
+                .Returns(new PimsDocumentQueue()
+                {
+                    DocumentId = 2,
+                    DocumentQueueStatusTypeCode = DocumentQueueStatusTypes.SUCCESS.ToString(),
+                });
+
+            documentQueueRepository
+                .Setup(x => x.Delete(It.IsAny<PimsDocumentQueue>()))
+                .Returns(true);
+
+            leaseDocumentRepository
+                .Setup(x => x.DeleteDocument(It.IsAny<PimsLeaseDocument>()));
+
+            documentRepository
+                .Setup(x => x.DeleteDocument(It.IsAny<PimsDocument>()))
+                .Returns(true);
 
             PimsLeaseDocument doc = new()
             {
                 Internal_Id = 1,
+                LeaseId = lease.Internal_Id,
                 DocumentId = 2,
                 Document = new PimsDocument()
                 {
                     DocumentId = 2,
                     MayanId = 200,
-                }
+                },
             };
 
             // Act
@@ -1758,39 +1809,67 @@ namespace Pims.Api.Test.Services
         public async void Delete_LeaseDocument_Success_NoResults_Status_NotFound()
         {
             // Arrange
-            var service = this.CreateDocumentFileServiceWithPermissions(Permissions.DocumentDelete, Permissions.LeaseEdit);
+            var service = this.CreateDocumentFileServiceWithPermissions(
+                Permissions.DocumentDelete,
+                Permissions.LeaseEdit);
+
             var documentService = this._helper.GetService<Mock<IDocumentService>>();
             var documentRepository = this._helper.GetService<Mock<IDocumentRepository>>();
             var documentQueueRepository = this._helper.GetService<Mock<IDocumentQueueRepository>>();
+            var leaseDocumentRepository =
+                this._helper.GetService<Mock<IDocumentRelationshipRepository<PimsLeaseDocument>>>();
 
-            var leaseDocumentRepository = this._helper.GetService<Mock<IDocumentRelationshipRepository<PimsLeaseDocument>>>();
+            var lease = EntityHelper.CreateLease(1);
+            lease.RegionCode = 1;
+
+            var user = EntityHelper.CreateUser("Test");
+            user.PimsRegionUsers.Add(new PimsRegionUser
+            {
+                RegionCode = 1,
+            });
+
+            var leaseRepository = this._helper.GetService<Mock<ILeaseRepository>>();
+            leaseRepository.Setup(x => x.GetNoTracking(lease.Internal_Id)).Returns(lease);
+
+            var userRepository = this._helper.GetService<Mock<IUserRepository>>();
+            userRepository.Setup(x => x.GetUserInfoByKeycloakUserId(It.IsAny<Guid>())).Returns(user);
+
+            var lookupRepository = this._helper.GetService<Mock<ILookupRepository>>();
+            lookupRepository.Setup(x => x.GetAllRegions()).Returns(new List<PimsRegion>());
 
             documentRepository.Setup(x => x.Find(It.IsAny<long>())).Returns(new PimsDocument() { DocumentId = 2, MayanId = 200 });
+
             documentRepository.Setup(x => x.BeginTransaction()).Returns(new Mock<IDbContextTransaction>().Object);
+
             documentService.Setup(x => x.DeleteMayanStorageDocumentAsync(It.IsAny<long>())).ReturnsAsync(new ExternalResponse<string>()
             {
-                Status = ExternalResponseStatus.Error,
-                HttpStatusCode = System.Net.HttpStatusCode.NotFound,
+                Status = ExternalResponseStatus.Success,
+                HttpStatusCode = System.Net.HttpStatusCode.OK,
             });
+
             documentRepository.Setup(x => x.Update(It.IsAny<PimsDocument>(), false)).Returns(new PimsDocument() { DocumentId = 2, MayanId = null });
             documentQueueRepository.Setup(x => x.GetByDocumentId(It.IsAny<long>())).Returns(new PimsDocumentQueue()
             {
                 DocumentId = 2,
                 DocumentQueueStatusTypeCode = DocumentQueueStatusTypes.SUCCESS.ToString(),
             });
+
             documentQueueRepository.Setup(x => x.Delete(It.IsAny<PimsDocumentQueue>())).Returns(true);
+
             leaseDocumentRepository.Setup(x => x.DeleteDocument(It.IsAny<PimsLeaseDocument>()));
-            documentRepository.Setup(x => x.DeleteDocument(It.IsAny<PimsDocument>())).Returns(true);
+
+            documentRepository.Setup(x => x.DeleteDocument(It.IsAny<PimsDocument>())) .Returns(true);
 
             PimsLeaseDocument doc = new()
             {
                 Internal_Id = 1,
+                LeaseId = lease.Internal_Id,
                 DocumentId = 2,
                 Document = new PimsDocument()
                 {
                     DocumentId = 2,
                     MayanId = 200,
-                }
+                },
             };
 
             // Act
@@ -2031,8 +2110,12 @@ namespace Pims.Api.Test.Services
                 Permissions.DocumentAdd,
                 Permissions.LeaseEdit);
 
+            var editableLease = EntityHelper.CreateLease(1);
+            editableLease.RegionCode = 1;
+
             var leaseRepository =
                 this._helper.GetService<Mock<ILeaseRepository>>();
+            leaseRepository.Setup(x => x.GetNoTracking(1)).Returns(editableLease);
 
             var userRepository =
                 this._helper.GetService<Mock<IUserRepository>>();
