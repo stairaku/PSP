@@ -128,7 +128,7 @@ describe('AddLeaseTeamSubForm component', () => {
   });
 
   it('restricts contact selection to PIMS users for PROPANALYST profile', async () => {
-    const { getByTestId, container } = setup({
+    const { getByTestId } = setup({
       initialForm: testForm,
     });
 
