@@ -15,6 +15,17 @@ import { createRef } from 'react';
 import { WithLeaseTeam } from '../models';
 import { AddLeaseTeamSubForm } from './AddLeaseTeamSubform';
 import { ApiGen_CodeTypes_LeaseTeamProfileTypes } from '@/models/api/generated/ApiGen_CodeTypes_LeaseTeamProfileTypes';
+import { RestrictContactType } from '@/constants/contacts';
+
+const contactInputMock = vi.fn();
+
+vi.mock('@/components/common/form/ContactInput/ContactInputContainer', () => ({
+  ContactInputContainer: (props: any) => {
+    contactInputMock(props);
+    return <div data-testid="contact-input-container" />;
+  },
+}));
+
 
 describe('AddLeaseTeamSubForm component', () => {
   // render component under test
@@ -128,13 +139,14 @@ describe('AddLeaseTeamSubForm component', () => {
       selectOptions('team.0.contactTypeCode', ApiGen_CodeTypes_LeaseTeamProfileTypes.PROPANALYST),
     );
 
-    expect(container.querySelector('#input-searchBy-pimsusers')).not.toBeNull();
-    expect(container.querySelector('#input-searchBy-persons')).toBeNull();
-    expect(container.querySelector('#input-searchBy-organizations')).toBeNull();
+     expect(contactInputMock).toHaveBeenLastCalledWith(expect.objectContaining({
+      restrictContactType: [RestrictContactType.ONLY_PIMSUSERS],
+    }),
+     );
   });
 
   it('allows all contact types for unrestricted team profiles', async () => {
-    const { getByTestId, container } = setup({
+    const { getByTestId } = setup({
       initialForm: testForm,
     });
 
@@ -144,8 +156,13 @@ describe('AddLeaseTeamSubForm component', () => {
       selectOptions('team.0.contactTypeCode', ApiGen_CodeTypes_LeaseTeamProfileTypes.MOTTLAWYER),
     );
 
-    expect(container.querySelector('#input-searchBy-pimsusers')).not.toBeNull();
-    expect(container.querySelector('#input-searchBy-persons')).not.toBeNull();
-    expect(container.querySelector('#input-searchBy-organizations')).not.toBeNull();
+    expect(contactInputMock).toHaveBeenLastCalledWith(expect.objectContaining({
+      restrictContactType: [
+        RestrictContactType.ONLY_PIMSUSERS,
+        RestrictContactType.ONLY_ORGANIZATIONS,
+        RestrictContactType.ONLY_INDIVIDUALS,
+      ],
+    }),
+     );
   });
 });
