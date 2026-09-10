@@ -16,6 +16,22 @@ import { ApiGen_CodeTypes_AcquisitionTeamProfileTypes } from '@/models/api/gener
 import { TeamMemberFormModal } from '../../modals/AcquisitionFormModal';
 import { AcquisitionTeamFormModel, WithAcquisitionTeam } from '../../models';
 
+export const getContactTypeRestriction = (contactTypeCode?: string) => {
+  switch (contactTypeCode) {
+    case ApiGen_CodeTypes_AcquisitionTeamProfileTypes.PROPCOORD:
+    case ApiGen_CodeTypes_AcquisitionTeamProfileTypes.PROPANLYS:
+    case ApiGen_CodeTypes_AcquisitionTeamProfileTypes.KEYCNTCT:
+      return [RestrictContactType.ONLY_PIMSUSERS];
+
+    default:
+      return [
+        RestrictContactType.ONLY_PIMSUSERS,
+        RestrictContactType.ONLY_INDIVIDUALS,
+        RestrictContactType.ONLY_ORGANIZATIONS,
+      ];
+  }
+};
+
 export const UpdateAcquisitionTeamSubForm: React.FunctionComponent<
   React.PropsWithChildren<unknown>
 > = () => {
@@ -24,22 +40,6 @@ export const UpdateAcquisitionTeamSubForm: React.FunctionComponent<
   const [removeIndex, setRemoveIndex] = useState<number>(-1);
   const { getOptionsByType } = useLookupCodeHelpers();
   const teamProfileTypes = getOptionsByType(API.ACQUISITION_FILE_TEAM_PROFILE_TYPES);
-
-  const getContactTypeRestriction = (contactTypeCode?: string) => {
-    switch (contactTypeCode) {
-      case ApiGen_CodeTypes_AcquisitionTeamProfileTypes.PROPCOORD:
-      case ApiGen_CodeTypes_AcquisitionTeamProfileTypes.PROPANLYS:
-      case ApiGen_CodeTypes_AcquisitionTeamProfileTypes.KEYCNTCT:
-        return [RestrictContactType.ONLY_PIMSUSERS];
-
-      default:
-        return [
-          RestrictContactType.ONLY_PIMSUSERS,
-          RestrictContactType.ONLY_INDIVIDUALS,
-          RestrictContactType.ONLY_ORGANIZATIONS,
-        ];
-    }
-  };
 
   return (
     <FieldArray

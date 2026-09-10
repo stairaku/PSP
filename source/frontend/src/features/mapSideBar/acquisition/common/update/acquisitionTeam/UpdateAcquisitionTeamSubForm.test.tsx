@@ -14,6 +14,7 @@ import {
 import { WithAcquisitionTeam } from '../../models';
 import { UpdateAcquisitionTeamSubForm } from './UpdateAcquisitionTeamSubForm';
 import { createRef } from 'react';
+import { ApiGen_CodeTypes_AcquisitionTeamProfileTypes } from '@/models/api/generated/ApiGen_CodeTypes_AcquisitionTeamProfileTypes';
 
 describe('AcquisitionTeamSubForm component', () => {
   // render component under test
@@ -117,5 +118,43 @@ describe('AcquisitionTeamSubForm component', () => {
     await act(async () => userEvent.click(addRow));
     await act(async () => selectOptions('team.0.contactTypeCode', 'MOTILAWYER'));
     expect(getIn(getFormikRef().current?.touched, 'team.0.contact')).toBe(true);
+  });
+
+  it('restricts contact selection to PIMS users for PROPCOORD profile', async () => {
+      const { getByTestId, container } = setup({
+        initialForm: testForm,
+      });
+
+      await act(async () => userEvent.click(getByTestId('add-team-member')));
+
+      await act(async () =>
+        selectOptions(
+          'team.0.contactTypeCode',
+          ApiGen_CodeTypes_AcquisitionTeamProfileTypes.PROPCOORD,
+        ),
+      );
+
+      expect(container.querySelector('#input-searchBy-pimsusers')).not.toBeNull();
+      expect(container.querySelector('#input-searchBy-persons')).toBeNull();
+      expect(container.querySelector('#input-searchBy-organizations')).toBeNull();
+  });
+
+  it('allows all contact types for unrestricted team profiles', async () => {
+    const { getByTestId, container } = setup({
+      initialForm: testForm,
+    });
+
+    await act(async () => userEvent.click(getByTestId('add-team-member')));
+
+    await act(async () =>
+      selectOptions(
+        'team.0.contactTypeCode',
+        ApiGen_CodeTypes_AcquisitionTeamProfileTypes.NEGOTAGENT,
+      ),
+    );
+
+    expect(container.querySelector('#input-searchBy-pimsusers')).not.toBeNull();
+    expect(container.querySelector('#input-searchBy-persons')).not.toBeNull();
+    expect(container.querySelector('#input-searchBy-organizations')).not.toBeNull();
   });
 });

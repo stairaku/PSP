@@ -84,7 +84,7 @@ const ContactManagerView = ({
             filter={filter}
             setFilter={setFilter}
             showActiveSelector={showActiveSelector}
-            restrictContactType={restrictContactType || []}
+            restrictContactType={restrictContactType}
           />
         </Col>
       </Row>

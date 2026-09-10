@@ -17,34 +17,34 @@ import { isValidId } from '@/utils';
 
 import { LeaseTeamFormModel, WithLeaseTeam } from '../models';
 
+const getContactTypeRestriction = (contactTypeCode?: string) => {
+  switch (contactTypeCode) {
+    case ApiGen_CodeTypes_LeaseTeamProfileTypes.PROPANALYST:
+    case ApiGen_CodeTypes_LeaseTeamProfileTypes.PROPCOORD:
+    case ApiGen_CodeTypes_LeaseTeamProfileTypes.MOTTCONTACT:
+    case ApiGen_CodeTypes_LeaseTeamProfileTypes.PROPADMIN:
+    case ApiGen_CodeTypes_LeaseTeamProfileTypes.LANDPRJMGR:
+    case ApiGen_CodeTypes_LeaseTeamProfileTypes.LANDOPSMGR:
+    case ApiGen_CodeTypes_LeaseTeamProfileTypes.KEYCNTCT:
+      return [RestrictContactType.ONLY_PIMSUSERS];
+
+    default:
+      return [
+        RestrictContactType.ONLY_PIMSUSERS,
+        RestrictContactType.ONLY_ORGANIZATIONS,
+        RestrictContactType.ONLY_INDIVIDUALS,
+      ];
+  }
+};
+
 export const AddLeaseTeamSubForm: React.FunctionComponent<
   React.PropsWithChildren<unknown>
 > = () => {
-  const { values, setFieldTouched } = useFormikContext<WithLeaseTeam>();
+  const { values, setFieldTouched, setFieldValue } = useFormikContext<WithLeaseTeam>();
   const [showRemoveMemberModal, setShowRemoveMemberModal] = useState<boolean>(false);
   const [removeIndex, setRemoveIndex] = useState<number>(-1);
   const { getOptionsByType } = useLookupCodeHelpers();
   const teamProfileTypes = getOptionsByType(API.LEASE_TEAM_PROFILE_TYPES);
-
-  const getContactTypeRestriction = (contactTypeCode?: string) => {
-    switch (contactTypeCode) {
-      case ApiGen_CodeTypes_LeaseTeamProfileTypes.PROPANALYST:
-      case ApiGen_CodeTypes_LeaseTeamProfileTypes.PROPCOORD:
-      case ApiGen_CodeTypes_LeaseTeamProfileTypes.MOTTCONTACT:
-      case ApiGen_CodeTypes_LeaseTeamProfileTypes.PROPADMIN:
-      case ApiGen_CodeTypes_LeaseTeamProfileTypes.LANDPRJMGR:
-      case ApiGen_CodeTypes_LeaseTeamProfileTypes.LANDOPSMGR:
-      case ApiGen_CodeTypes_LeaseTeamProfileTypes.KEYCNTCT:
-        return [RestrictContactType.ONLY_PIMSUSERS];
-
-      default:
-        return [
-          RestrictContactType.ONLY_PIMSUSERS,
-          RestrictContactType.ONLY_ORGANIZATIONS,
-          RestrictContactType.ONLY_INDIVIDUALS,
-        ];
-    }
-  };
 
   return (
     <FieldArray
@@ -64,6 +64,8 @@ export const AddLeaseTeamSubForm: React.FunctionComponent<
                       options={teamProfileTypes}
                       value={teamMember.contactTypeCode}
                       onChange={() => {
+                        setFieldValue(`team.${index}.contact`, null);
+                        setFieldValue(`team.${index}.primaryContactId`, null);
                         setFieldTouched(`team.${index}.contact`);
                       }}
                     />

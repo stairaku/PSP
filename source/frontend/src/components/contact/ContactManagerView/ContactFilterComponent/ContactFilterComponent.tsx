@@ -56,13 +56,15 @@ export const ContactFilterComponent: React.FunctionComponent<
     setFilter({ ...defaultFilter, searchBy: [...values.searchBy] });
   };
 
+  const effectiveContactTypes = restrictContactType?.length ? restrictContactType : allContactTypes;
+
   return (
     <Formik<IContactFilter>
       enableReinitialize
       initialValues={
         filter ?? {
           ...defaultFilter,
-          searchBy: restrictContactType ? [...restrictContactType] : allContactTypes,
+          searchBy: [...effectiveContactTypes],
         }
       }
       onSubmit={(values, { setSubmitting }) => {
@@ -96,7 +98,7 @@ export const ContactFilterComponent: React.FunctionComponent<
                       isLabelBold={true}
                       field="searchBy"
                       flexDirection="row"
-                      checkValues={getRestrictedCheckValues(restrictContactType)}
+                      checkValues={getRestrictedCheckValues(effectiveContactTypes)}
                     >
                       {showActiveSelector && (
                         <BootstrapForm.Check
@@ -137,9 +139,7 @@ export const ContactFilterComponent: React.FunctionComponent<
                     onClick={() => {
                       const resetValues = {
                         ...defaultFilter,
-                        searchBy: restrictContactType
-                          ? [...restrictContactType]
-                          : [...defaultFilter.searchBy],
+                        searchBy: [...effectiveContactTypes],
                       };
                       resetForm({ values: resetValues });
                       resetFilter(resetValues);
@@ -162,21 +162,9 @@ const getRestrictedCheckValues = (
     return contactTypeOptions;
   }
 
-  const options: CheckGroupOption[] = [];
-
-  if (restrictContactTypes.includes(RestrictContactType.ONLY_INDIVIDUALS)) {
-    options.push({ label: 'Individuals', value: 'persons' });
-  }
-
-  if (restrictContactTypes.includes(RestrictContactType.ONLY_ORGANIZATIONS)) {
-    options.push({ label: 'Organizations', value: 'organizations' });
-  }
-
-  if (restrictContactTypes.includes(RestrictContactType.ONLY_PIMSUSERS)) {
-    options.push({ label: 'Pims users', value: 'pimsusers' });
-  }
-
-  return options;
+  return contactTypeOptions.filter(option =>
+    restrictContactTypes.includes(option.value as RestrictContactType),
+  );
 };
 
 const StyledFilterBoxForm = styled(Form)`
