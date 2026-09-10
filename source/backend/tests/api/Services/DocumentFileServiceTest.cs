@@ -43,6 +43,41 @@ namespace Pims.Api.Test.Services
             return this._helper.Create<DocumentFileService>();
         }
 
+        private void SetupEditableLease(long leaseId = 1)
+        {
+            var leaseRepository = this._helper.GetService<Mock<ILeaseRepository>>();
+            var userRepository = this._helper.GetService<Mock<IUserRepository>>();
+            var lookupRepository = this._helper.GetService<Mock<ILookupRepository>>();
+
+            var lease = EntityHelper.CreateLease((int)leaseId);
+            lease.RegionCode = 1;
+
+            var user = EntityHelper.CreateUser(
+                1,
+                Guid.NewGuid(),
+                "Test",
+                regionCode: 1);
+
+            leaseRepository
+                .Setup(x => x.GetNoTracking(leaseId))
+                .Returns(lease);
+
+            userRepository
+                .Setup(x => x.GetUserInfoByKeycloakUserId(It.IsAny<Guid>()))
+                .Returns(user);
+
+            lookupRepository
+                .Setup(x => x.GetAllRegions())
+                .Returns(new List<PimsRegion>
+                {
+                    new PimsRegion
+                    {
+                        Code = 4,
+                        RegionName = "Cannot determine",
+                    },
+                });
+        }
+
         [Fact]
         public void GetFileDocuments_ShouldThrowException_NotAuthorized()
         {
@@ -693,6 +728,7 @@ namespace Pims.Api.Test.Services
         {
             // Arrange
             var service = this.CreateDocumentFileServiceWithPermissions(Permissions.DocumentAdd, Permissions.LeaseEdit);
+            SetupEditableLease();
             var documentRepository = this._helper.GetService<Mock<IDocumentRepository>>();
             var documentQueueRepository = this._helper.GetService<Mock<IDocumentQueueRepository>>();
             var leaseDocumentRepository = this._helper.GetService<Mock<IDocumentRelationshipRepository<PimsLeaseDocument>>>();
@@ -735,6 +771,7 @@ namespace Pims.Api.Test.Services
         {
             // Arrange
             var service = this.CreateDocumentFileServiceWithPermissions(Permissions.DocumentAdd, Permissions.LeaseEdit);
+            SetupEditableLease();
             var documentService = this._helper.GetService<Mock<IDocumentService>>();
             var leaseDocumentRepository = this._helper.GetService<Mock<IDocumentRelationshipRepository<PimsLeaseDocument>>>();
             documentService.Setup(x => x.UploadDocumentAsync(It.IsAny<DocumentUploadRequest>(), false));
@@ -1984,6 +2021,66 @@ namespace Pims.Api.Test.Services
             // Assert
             Assert.NotNull(result);
             Assert.Equal(result.Status, ExternalResponseStatus.Success);
+        }
+
+        [Fact]
+        public async Task UploadDocument_Lease_UserOutsideRegion_ShouldThrowNotAuthorized()
+        {
+            // Arrange
+            var service = this.CreateDocumentFileServiceWithPermissions(
+                Permissions.DocumentAdd,
+                Permissions.LeaseEdit);
+
+            var leaseRepository =
+                this._helper.GetService<Mock<ILeaseRepository>>();
+
+            var userRepository =
+                this._helper.GetService<Mock<IUserRepository>>();
+
+            var lookupRepository =
+                this._helper.GetService<Mock<ILookupRepository>>();
+
+            var lease = EntityHelper.CreateLease(1);
+            lease.RegionCode = 2;
+            lease.PimsLeaseLicenseTeams = new List<PimsLeaseLicenseTeam>();
+
+            var user = EntityHelper.CreateUser(
+                1,
+                Guid.NewGuid(),
+                "Test",
+                regionCode: 1);
+
+            leaseRepository
+                .Setup(x => x.GetNoTracking(1))
+                .Returns(lease);
+
+            userRepository
+                .Setup(x => x.GetUserInfoByKeycloakUserId(It.IsAny<Guid>()))
+                .Returns(user);
+
+            lookupRepository
+                .Setup(x => x.GetAllRegions())
+                .Returns(new List<PimsRegion>
+                {
+                    new PimsRegion
+                    {
+                        Code = 4,
+                        RegionName = "Cannot determine",
+                    },
+                });
+
+            var uploadRequest = new DocumentUploadRequest
+            {
+                DocumentTypeId = 1,
+                File = this._helper.GetFormFile("Lorem Ipsum"),
+            };
+
+            // Act
+            Func<Task> act =
+                async () => await service.UploadLeaseDocument(1, uploadRequest);
+
+            // Assert
+            await act.Should().ThrowAsync<NotAuthorizedException>();
         }
     }
 }
