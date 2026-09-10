@@ -120,28 +120,28 @@ describe('AcquisitionTeamSubForm component', () => {
     expect(getByName('team.0.contactTypeCode')).toBeVisible();
   });
 
- it('restricts contact selection to PIMS users for PROPCOORD profile', async () => {
-  const { getByTestId } = setup({
-    initialForm: testForm,
+  it('restricts contact selection to PIMS users for PROPCOORD profile', async () => {
+    const { getByTestId } = setup({
+      initialForm: testForm,
+    });
+
+    await act(async () => userEvent.click(getByTestId('add-team-member')));
+
+    await act(async () =>
+      selectOptions(
+        'team.0.contactTypeCode',
+        ApiGen_CodeTypes_AcquisitionTeamProfileTypes.PROPCOORD,
+      ),
+    );
+
+    expect(contactInputMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        restrictContactType: [RestrictContactType.ONLY_PIMSUSERS],
+      }),
+    );
   });
 
-  await act(async () => userEvent.click(getByTestId('add-team-member')));
-
-  await act(async () =>
-    selectOptions(
-      'team.0.contactTypeCode',
-      ApiGen_CodeTypes_AcquisitionTeamProfileTypes.PROPCOORD,
-    ),
-  );
-
-  expect(contactInputMock).toHaveBeenLastCalledWith(
-    expect.objectContaining({
-      restrictContactType: [RestrictContactType.ONLY_PIMSUSERS],
-    }),
-  );
-});
-
-it('allows all contact types for unrestricted team profiles', async () => {
+  it('allows all contact types for unrestricted team profiles', async () => {
     const { getByTestId } = setup({
       initialForm: testForm,
     });

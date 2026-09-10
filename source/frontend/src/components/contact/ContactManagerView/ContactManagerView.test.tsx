@@ -254,16 +254,16 @@ describe('ContactManagerView', () => {
   });
 
   it('displays only the restricted contact types', async () => {
-  const { container } = await setup({
-    noInitialSearch: true,
-    restrictContactType: [
-      RestrictContactType.ONLY_INDIVIDUALS,
-      RestrictContactType.ONLY_PIMSUSERS,
-    ],
-  });
+    const { container } = await setup({
+      noInitialSearch: true,
+      restrictContactType: [
+        RestrictContactType.ONLY_INDIVIDUALS,
+        RestrictContactType.ONLY_PIMSUSERS,
+      ],
+    });
 
-  expect(container.querySelector('#input-searchBy-persons')).not.toBeNull();
-  expect(container.querySelector('#input-searchBy-pimsusers')).not.toBeNull();
-  expect(container.querySelector('#input-searchBy-organizations')).toBeNull();
-});
+    expect(container.querySelector('#input-searchBy-persons')).not.toBeNull();
+    expect(container.querySelector('#input-searchBy-pimsusers')).not.toBeNull();
+    expect(container.querySelector('#input-searchBy-organizations')).toBeNull();
+  });
 });

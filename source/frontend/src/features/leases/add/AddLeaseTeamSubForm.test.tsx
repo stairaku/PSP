@@ -26,7 +26,6 @@ vi.mock('@/components/common/form/ContactInput/ContactInputContainer', () => ({
   },
 }));
 
-
 describe('AddLeaseTeamSubForm component', () => {
   // render component under test
   const setup = (props: { initialForm: WithLeaseTeam }, renderOptions: RenderOptions = {}) => {
@@ -139,10 +138,11 @@ describe('AddLeaseTeamSubForm component', () => {
       selectOptions('team.0.contactTypeCode', ApiGen_CodeTypes_LeaseTeamProfileTypes.PROPANALYST),
     );
 
-     expect(contactInputMock).toHaveBeenLastCalledWith(expect.objectContaining({
-      restrictContactType: [RestrictContactType.ONLY_PIMSUSERS],
-    }),
-     );
+    expect(contactInputMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        restrictContactType: [RestrictContactType.ONLY_PIMSUSERS],
+      }),
+    );
   });
 
   it('allows all contact types for unrestricted team profiles', async () => {
@@ -156,13 +156,14 @@ describe('AddLeaseTeamSubForm component', () => {
       selectOptions('team.0.contactTypeCode', ApiGen_CodeTypes_LeaseTeamProfileTypes.MOTTLAWYER),
     );
 
-    expect(contactInputMock).toHaveBeenLastCalledWith(expect.objectContaining({
-      restrictContactType: [
-        RestrictContactType.ONLY_PIMSUSERS,
-        RestrictContactType.ONLY_ORGANIZATIONS,
-        RestrictContactType.ONLY_INDIVIDUALS,
-      ],
-    }),
-     );
+    expect(contactInputMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        restrictContactType: [
+          RestrictContactType.ONLY_PIMSUSERS,
+          RestrictContactType.ONLY_ORGANIZATIONS,
+          RestrictContactType.ONLY_INDIVIDUALS,
+        ],
+      }),
+    );
   });
 });
