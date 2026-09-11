@@ -469,7 +469,7 @@ namespace Pims.Api.Services
             _user.ThrowIfNotAuthorized(Permissions.LeaseEdit);
 
             var currentLease = _leaseRepository.GetNoTracking(consultation.LeaseId) ?? throw new InvalidDataException("Invalid lease");
-            var currentLeaseStatus = _leaseStatusSolver.GetCurrentLeaseStatus(currentLease?.LeaseStatusTypeCode);
+            var currentLeaseStatus = _leaseStatusSolver.GetCurrentLeaseStatus(currentLease.LeaseStatusTypeCode);
             if (!_leaseStatusSolver.CanEditOrDeleteConsultation(currentLeaseStatus))
             {
                 throw new BusinessRuleViolationException("The file you are editing is not active, so you cannot save changes. Refresh your browser to see file state.");
@@ -490,7 +490,7 @@ namespace Pims.Api.Services
 
             var consultation = _consultationRepository.GetConsultationById(consultationId);
             var currentLease = _leaseRepository.GetNoTracking(consultation.LeaseId) ?? throw new InvalidDataException("Invalid lease");
-            var currentLeaseStatus = _leaseStatusSolver.GetCurrentLeaseStatus(currentLease?.LeaseStatusTypeCode);
+            var currentLeaseStatus = _leaseStatusSolver.GetCurrentLeaseStatus(currentLease.LeaseStatusTypeCode);
             if (!_leaseStatusSolver.CanEditOrDeleteConsultation(currentLeaseStatus))
             {
                 throw new BusinessRuleViolationException("The file you are editing is not active, so you cannot save changes. Refresh your browser to see file state.");
