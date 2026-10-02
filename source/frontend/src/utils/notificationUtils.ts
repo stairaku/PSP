@@ -63,6 +63,19 @@ export const getNotificationDeepLink = (
             'fileDetails',
           )
         : null;
+    case ApiGen_CodeTypes_NotificationTypes.TAKE_LAT:
+    case ApiGen_CodeTypes_NotificationTypes.TAKE_LTC:
+    case ApiGen_CodeTypes_NotificationTypes.TAKE_SRW:
+    case ApiGen_CodeTypes_NotificationTypes.TAKE_LPYBLE:
+      return isValidId(notification.acquisitionFileId) &&
+        isValidId(notification.propertyAcquisitionFileId)
+        ? DeepLinkGenerator.showFilePropertyDetail(
+            ApiGen_CodeTypes_FileTypes.Acquisition,
+            notification.acquisitionFileId,
+            notification.propertyAcquisitionFileId,
+            'takes',
+          )
+        : null;
     default:
       return null;
   }

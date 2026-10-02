@@ -23,6 +23,7 @@ namespace Pims.Api.Models.Concepts.Notification
                 .Map(dest => dest.LeaseRenewalId, src => src.LeaseRenewalId)
                 .Map(dest => dest.ExpropOwnerHistoryId, src => src.ExpropOwnerHistoryId)
                 .Map(dest => dest.AgreementId, src => src.AgreementId)
+                .Map(dest => dest.PropertyAcquisitionFileId, src => src.Take == null ? (long?)null : src.Take.PropertyAcquisitionFileId)
                 .Map(dest => dest.NotificationTriggerDate, src => src.NotificationTriggerDate)
                 .Map(dest => dest.NotificationMessage, src => src.NotificationMessage)
                 .Inherits<Entity.IBaseAppEntity, BaseConcurrentModel>();

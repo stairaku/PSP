@@ -26,6 +26,8 @@ namespace Pims.Api.Models.Concepts.Notification
 
         public long? TakeId { get; set; }
 
+        public long? PropertyAcquisitionFileId { get; set; }
+
         public long? InsuranceId { get; set; }
 
         public long? LeaseConsultationId { get; set; }

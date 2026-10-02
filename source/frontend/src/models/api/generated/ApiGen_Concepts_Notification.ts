@@ -18,6 +18,7 @@ export interface ApiGen_Concepts_Notification extends ApiGen_Base_BaseConcurrent
   managementFileId: number | null;
   leaseId: number | null;
   takeId: number | null;
+  propertyAcquisitionFileId: number | null;
   insuranceId: number | null;
   leaseConsultationId: number | null;
   noticeOfClaimId: number | null;
